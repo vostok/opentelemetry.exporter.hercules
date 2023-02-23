@@ -1,0 +1,18 @@
+notests *default:
+  build:
+    target: Vostok.OpenTelemetry.Exporter.Hercules.sln
+    configuration: NoTests
+    tool:
+      name: dotnet
+
+  install:
+    - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net6.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
+
+  deps:
+    - vostok.hercules.client.abstractions
+    - vostok.devtools
+
+full-build > notests:
+  build:
+    target: Vostok.OpenTelemetry.Exporter.Hercules.sln
+    configuration: Release

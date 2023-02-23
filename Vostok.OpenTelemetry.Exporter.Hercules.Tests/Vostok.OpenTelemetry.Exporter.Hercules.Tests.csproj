@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\vostok.devtools\library-common-props\Test-Project.props" />
+  <Import Project="..\..\vostok.devtools\git-commit-to-assembly-title\Vostok.Tools.GitCommit2AssemblyTitle.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.4.1" />
+    <PackageReference Include="NSubstitute" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vostok.OpenTelemetry.Exporter.Hercules\Vostok.OpenTelemetry.Exporter.Hercules.csproj" />
+  </ItemGroup>
+
+</Project>
