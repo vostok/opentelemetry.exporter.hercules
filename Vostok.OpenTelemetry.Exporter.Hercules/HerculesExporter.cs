@@ -1,5 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using OpenTelemetry;
+using Vostok.Hercules.Client.Abstractions;
 using Vostok.Hercules.Client.Abstractions.Events;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
@@ -8,15 +10,21 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules;
 public abstract class HerculesExporter<T> : BaseExporter<T>
     where T : class
 {
-    private readonly HerculesExporterSettings<T> settings;
+    private readonly IHerculesSink sink;
+    private readonly HerculesExporterOptions<T> options;
 
-    protected HerculesExporter(HerculesExporterSettings<T> settings) =>
-        this.settings = settings;
+    protected HerculesExporter(IHerculesSink sink, HerculesExporterOptions<T> options)
+    {
+        this.sink = sink;
+        this.options = options;
+    }
 
     public override ExportResult Export(in Batch<T> batch)
     {
+        Console.WriteLine($"Export {batch.Count} events.");
+        
         foreach (var @event in batch)
-            settings.Sink.Put(SelectStream(@event), b => BuildEvent(b, @event));
+            sink.Put(SelectStream(@event), b => BuildEvent(b, @event));
 
         return ExportResult.Success;
     }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
+using Vostok.Hercules.Client.Abstractions;
 using Vostok.Hercules.Client.Abstractions.Events;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
@@ -7,14 +8,14 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules;
 [PublicAPI]
 public class HerculesActivityExporter : HerculesExporter<Activity>
 {
-    private readonly HerculesActivityExporterSettings settings;
+    private readonly HerculesActivityExporterOptions options;
 
-    public HerculesActivityExporter(HerculesActivityExporterSettings settings)
-        : base(settings) =>
-        this.settings = settings;
+    public HerculesActivityExporter(IHerculesSink sink, HerculesActivityExporterOptions options)
+        : base(sink, options) =>
+        this.options = options;
 
     protected override string SelectStream(Activity @event) =>
-        settings.Stream;
+        options.Stream;
 
     protected override void BuildEvent(IHerculesEventBuilder builder, Activity @event)
     {
