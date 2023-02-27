@@ -32,11 +32,11 @@ public static class TracerProviderBuilderExtensions
 
         builder.AddProcessor(serviceProvider =>
         {
-            var options = serviceProvider.GetRequiredService<IOptionsMonitor<HerculesActivityExporterOptions>>().Get(name);
+            var optionsProvider = () => serviceProvider.GetRequiredService<IOptionsMonitor<HerculesActivityExporterOptions>>().Get(name);
 
             var sink = serviceProvider.GetRequiredService<IHerculesSink>();
 
-            return new SimpleActivityExportProcessor(new HerculesActivityExporter(sink, options));
+            return new SimpleActivityExportProcessor(new HerculesActivityExporter(sink, optionsProvider));
         });
 
         return builder;

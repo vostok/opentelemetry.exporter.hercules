@@ -11,12 +11,12 @@ public abstract class HerculesExporter<T> : BaseExporter<T>
     where T : class
 {
     private readonly IHerculesSink sink;
-    private readonly HerculesExporterOptions<T> options;
+    private readonly Func<HerculesActivityExporterOptions> optionsProvider;
 
-    protected HerculesExporter(IHerculesSink sink, HerculesExporterOptions<T> options)
+    protected HerculesExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
     {
         this.sink = sink;
-        this.options = options;
+        this.optionsProvider = optionsProvider;
     }
 
     public override ExportResult Export(in Batch<T> batch)

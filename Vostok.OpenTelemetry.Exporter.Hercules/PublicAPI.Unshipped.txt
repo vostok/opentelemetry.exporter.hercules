@@ -3,17 +3,22 @@ abstract Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.SelectStream
 override Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporter.BuildEvent(Vostok.Hercules.Client.Abstractions.Events.IHerculesEventBuilder! builder, System.Diagnostics.Activity! event) -> void
 override Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporter.SelectStream(System.Diagnostics.Activity! event) -> string!
 override Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.Export(in OpenTelemetry.Batch<T!> batch) -> OpenTelemetry.ExportResult
+static Vostok.OpenTelemetry.Exporter.Hercules.Builders.HerculesActivityBuilder.Build(System.Diagnostics.Activity! activity, OpenTelemetry.Resources.Resource! resource, System.IFormatProvider? formatProvider = null) -> Vostok.Hercules.Client.Abstractions.Events.HerculesEvent!
+static Vostok.OpenTelemetry.Exporter.Hercules.Builders.HerculesActivityBuilder.Build(System.Diagnostics.Activity! activity, OpenTelemetry.Resources.Resource! resource, Vostok.Hercules.Client.Abstractions.Events.IHerculesEventBuilder! builder, System.IFormatProvider? formatProvider = null) -> void
 static Vostok.OpenTelemetry.Exporter.Hercules.TracerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Trace.TracerProviderBuilder! builder) -> OpenTelemetry.Trace.TracerProviderBuilder!
 static Vostok.OpenTelemetry.Exporter.Hercules.TracerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Trace.TracerProviderBuilder! builder, string? name, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions!>? configure) -> OpenTelemetry.Trace.TracerProviderBuilder!
 static Vostok.OpenTelemetry.Exporter.Hercules.TracerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Trace.TracerProviderBuilder! builder, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions!>? configure) -> OpenTelemetry.Trace.TracerProviderBuilder!
+Vostok.OpenTelemetry.Exporter.Hercules.Builders.HerculesActivityBuilder
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporter
-Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporter.HerculesActivityExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions! options) -> void
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporter.HerculesActivityExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, System.Func<Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions!>! optionsProvider) -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.FormatProvider.get -> System.IFormatProvider?
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.FormatProvider.set -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.HerculesActivityExporterOptions() -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.Stream.get -> string!
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.Stream.set -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>
-Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.HerculesExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterOptions<T!>! options) -> void
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.HerculesExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, System.Func<Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions!>! optionsProvider) -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterOptions<T>
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterOptions<T>.HerculesExporterOptions() -> void
 Vostok.OpenTelemetry.Exporter.Hercules.TracerProviderBuilderExtensions
