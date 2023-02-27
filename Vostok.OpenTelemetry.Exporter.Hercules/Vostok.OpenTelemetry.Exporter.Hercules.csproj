@@ -1,41 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\vostok.devtools\library-common-props\Main-Project.props" />
-  <Import Project="..\..\vostok.devtools\git-commit-to-assembly-title\Vostok.Tools.GitCommit2AssemblyTitle.props" />
-  <Import Project="..\..\vostok.commons.formatting\ObjectValueFormatter.props" Condition="Exists('..\..\vostok.commons.formatting\ObjectValueFormatter.props')" />
-  <PropertyGroup>
-    <Configurations>Debug;Release</Configurations>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  <PropertyGroup>
-    <VersionPrefix>0.0.1</VersionPrefix>
-  </PropertyGroup>
-  <PropertyGroup>
-    <Title>Vostok.OpenTelemetry.Exporter.Hercules</Title>
-    <Description>Implementation of OpenTelemetry exporters based on HerculesSink</Description>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PackageProjectUrl>https://github.com/vostok/opentelemetry.exporter.hercules</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/vostok/opentelemetry.exporter.hercules/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageTags>vostok opentelemetry</PackageTags>
-    <PackageReleaseNotes>https://github.com/vostok/opentelemetry.exporter.hercules/blob/master/CHANGELOG.md</PackageReleaseNotes>
-    <RepositoryUrl>https://github.com/vostok/opentelemetry.exporter.hercules</RepositoryUrl>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\..\vostok.commons.time\Vostok.Commons.Time\EpochHelper.cs" Link="Commons\EpochHelper.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.4" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Vostok.Hercules.Client.Abstractions">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.hercules.client.abstractions\Vostok.Hercules.Client.Abstractions\bin\Release\netstandard2.0\Vostok.Hercules.Client.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Vostok.Tracing.Diagnostics">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.tracing.diagnostics\Vostok.Tracing.Diagnostics\bin\Release\net6.0\Vostok.Tracing.Diagnostics.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <Import Project="..\..\vostok.devtools\library-common-props\Main-Project.props"/>
+    <Import Project="..\..\vostok.devtools\git-commit-to-assembly-title\Vostok.Tools.GitCommit2AssemblyTitle.props"/>
+    <Import Project="..\..\vostok.commons.formatting\ObjectValueFormatter.props" Condition="Exists('..\..\vostok.commons.formatting\ObjectValueFormatter.props')"/>
+    <PropertyGroup>
+        <Configurations>Debug;Release</Configurations>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VersionPrefix>0.0.1</VersionPrefix>
+    </PropertyGroup>
+    <PropertyGroup>
+        <Title>Vostok.OpenTelemetry.Exporter.Hercules</Title>
+        <Description>Implementation of OpenTelemetry exporters based on HerculesSink</Description>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PackageProjectUrl>https://github.com/vostok/opentelemetry.exporter.hercules</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/vostok/opentelemetry.exporter.hercules/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageTags>vostok opentelemetry</PackageTags>
+        <PackageReleaseNotes>https://github.com/vostok/opentelemetry.exporter.hercules/blob/master/CHANGELOG.md</PackageReleaseNotes>
+        <RepositoryUrl>https://github.com/vostok/opentelemetry.exporter.hercules</RepositoryUrl>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="..\..\vostok.commons.time\Vostok.Commons.Time\EpochHelper.cs" Link="Commons\EpochHelper.cs"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.4"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Reference Include="Vostok.Hercules.Client.Abstractions">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>..\..\vostok.hercules.client.abstractions\Vostok.Hercules.Client.Abstractions\bin\Release\netstandard2.0\Vostok.Hercules.Client.Abstractions.dll</HintPath>
+        </Reference>
+        <Reference Include="Vostok.Tracing.Diagnostics">
+            <SpecificVersion>False</SpecificVersion>
+            <HintPath>..\..\vostok.tracing.diagnostics\Vostok.Tracing.Diagnostics\bin\Release\net6.0\Vostok.Tracing.Diagnostics.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>
