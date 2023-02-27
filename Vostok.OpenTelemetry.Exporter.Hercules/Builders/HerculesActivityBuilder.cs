@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
@@ -64,6 +65,7 @@ public static class HerculesActivityBuilder
             AddAnnotation(builder, resourceAttribute.Key, resourceAttribute.Value, formatProvider);
     }
     
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AddAnnotation(IHerculesTagsBuilder builder, string key, object? value, IFormatProvider? formatProvider)
     {
         if (!builder.TryAddObject(key, value))
