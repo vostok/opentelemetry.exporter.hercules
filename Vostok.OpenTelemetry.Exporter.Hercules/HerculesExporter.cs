@@ -11,18 +11,12 @@ public abstract class HerculesExporter<T> : BaseExporter<T>
     where T : class
 {
     private readonly IHerculesSink sink;
-    private readonly Func<HerculesActivityExporterOptions> optionsProvider;
 
-    protected HerculesExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
-    {
+    protected HerculesExporter(IHerculesSink sink) =>
         this.sink = sink;
-        this.optionsProvider = optionsProvider;
-    }
 
     public override ExportResult Export(in Batch<T> batch)
     {
-        Console.WriteLine($"Export {batch.Count} events.");
-        
         foreach (var @event in batch)
             sink.Put(SelectStream(@event), b => BuildEvent(b, @event));
 
