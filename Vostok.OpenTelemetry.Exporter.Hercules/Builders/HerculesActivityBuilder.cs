@@ -8,6 +8,7 @@ using Vostok.Commons.Formatting;
 using Vostok.Commons.Time;
 using Vostok.Hercules.Client.Abstractions.Events;
 using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+using Vostok.Tracing.Abstractions;
 using Vostok.Tracing.Diagnostics.Helpers;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
@@ -48,12 +49,14 @@ public static class HerculesActivityBuilder
 
     private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
     {
+        // todo (kungurtsev, 27.02.2023): add "source" and "status.description" constants to WellKnownAnnotations.Common
+        
         AddAnnotation(builder, "source", activity.Source.Name, formatProvider);
-        AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
-        AddAnnotation(builder, "kind", activity.Kind, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Operation, activity.DisplayName, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Kind, activity.Kind, formatProvider);
 
         if (activity.Status != ActivityStatusCode.Unset)
-            AddAnnotation(builder, "status", activity.Status, formatProvider);
+            AddAnnotation(builder, WellKnownAnnotations.Common.Status, activity.Status, formatProvider);
         if (!string.IsNullOrEmpty(activity.StatusDescription))
             AddAnnotation(builder, "status.description", activity.StatusDescription, formatProvider);
 
