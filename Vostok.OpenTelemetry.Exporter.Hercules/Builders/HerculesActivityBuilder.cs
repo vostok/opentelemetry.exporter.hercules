@@ -41,13 +41,22 @@ public static class HerculesActivityBuilder
 
         builder.AddContainer(TagNames.Annotations, tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
 
-        // todo (kungurtsev, 27.02.2023): send Activity.Status
         // todo (kungurtsev, 27.02.2023): send Activity.Events
         // todo (kungurtsev, 27.02.2023): send Activity.Links
     }
 
     private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
     {
+        AddAnnotation(builder, "source", activity.Source.Name, formatProvider);
+        AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
+        AddAnnotation(builder, "kind", activity.Kind, formatProvider);
+
+        
+        if (activity.Status != ActivityStatusCode.Unset)
+            AddAnnotation(builder, "status", activity.Status, formatProvider);
+        if (!string.IsNullOrEmpty(activity.StatusDescription))
+            AddAnnotation(builder, "status.description", activity.StatusDescription, formatProvider);
+        
         foreach (ref readonly var pair in activity.EnumerateTagObjects())
             AddAnnotation(builder, pair.Key, pair.Value, formatProvider);
 
