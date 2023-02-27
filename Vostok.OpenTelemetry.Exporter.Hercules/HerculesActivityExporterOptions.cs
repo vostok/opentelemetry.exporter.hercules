@@ -1,11 +1,10 @@
 using System;
-using System.Diagnostics;
 using JetBrains.Annotations;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
-public class HerculesActivityExporterOptions : HerculesExporterOptions<Activity>
+public class HerculesActivityExporterOptions
 {
     /// <summary>
     /// Name of the Hercules stream to use.

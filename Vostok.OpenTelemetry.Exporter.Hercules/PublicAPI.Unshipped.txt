@@ -18,7 +18,5 @@ Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.HerculesA
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.Stream.get -> string!
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions.Stream.set -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>
-Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.HerculesExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, System.Func<Vostok.OpenTelemetry.Exporter.Hercules.HerculesActivityExporterOptions!>! optionsProvider) -> void
-Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterOptions<T>
-Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterOptions<T>.HerculesExporterOptions() -> void
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporter<T>.HerculesExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink) -> void
 Vostok.OpenTelemetry.Exporter.Hercules.TracerProviderBuilderExtensions
