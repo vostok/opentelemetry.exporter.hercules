@@ -10,7 +10,7 @@ public class HerculesActivityExporterOptions
     /// Name of the Hercules stream to use.
     /// </summary>
     public string Stream { get; set; } = "traces";
-    
+
     /// <summary>
     /// If specified, this <see cref="IFormatProvider"/> will be used when formatting annotation values to strings.
     /// </summary>

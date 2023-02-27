@@ -14,10 +14,9 @@ public static class TracerProviderBuilderExtensions
     public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder) =>
         builder.AddHerculesExporter(null, null);
 
-    
     public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder, Action<HerculesActivityExporterOptions>? configure) =>
         builder.AddHerculesExporter(null, configure);
-    
+
     public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder, string? name, Action<HerculesActivityExporterOptions>? configure)
     {
         ArgumentNullException.ThrowIfNull(builder);

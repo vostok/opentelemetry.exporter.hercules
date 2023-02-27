@@ -52,19 +52,18 @@ public static class HerculesActivityBuilder
         AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
         AddAnnotation(builder, "kind", activity.Kind, formatProvider);
 
-        
         if (activity.Status != ActivityStatusCode.Unset)
             AddAnnotation(builder, "status", activity.Status, formatProvider);
         if (!string.IsNullOrEmpty(activity.StatusDescription))
             AddAnnotation(builder, "status.description", activity.StatusDescription, formatProvider);
-        
+
         foreach (ref readonly var pair in activity.EnumerateTagObjects())
             AddAnnotation(builder, pair.Key, pair.Value, formatProvider);
 
         foreach (var resourceAttribute in resource.Attributes)
             AddAnnotation(builder, resourceAttribute.Key, resourceAttribute.Value, formatProvider);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AddAnnotation(IHerculesTagsBuilder builder, string key, object? value, IFormatProvider? formatProvider)
     {

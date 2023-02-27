@@ -1,5 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using OpenTelemetry;
 using Vostok.Hercules.Client.Abstractions;
 using Vostok.Hercules.Client.Abstractions.Events;
@@ -24,6 +23,6 @@ public abstract class HerculesExporter<T> : BaseExporter<T>
     }
 
     protected abstract string SelectStream(T @event);
-    
+
     protected abstract void BuildEvent(IHerculesEventBuilder builder, T @event);
 }
