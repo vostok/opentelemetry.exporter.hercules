@@ -16,9 +16,8 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 /// <summary>
 /// Converts <see cref="Activity"/>s to <see cref="HerculesEvent"/>.
 /// </summary>
-[PublicAPI]
 [SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters")]
-public static class HerculesActivityBuilder
+internal static class HerculesActivityBuilder
 {
     public static HerculesEvent Build(Activity activity, Resource resource, IFormatProvider? formatProvider = null)
     {
@@ -49,9 +48,9 @@ public static class HerculesActivityBuilder
 
     private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
     {
-        // todo (kungurtsev, 27.02.2023): add "source" and "status.description" constants to WellKnownAnnotations.Common
+        // todo (kungurtsev, 27.02.2023): add "status.description" constants to WellKnownAnnotations.Common
         
-        AddAnnotation(builder, "source", activity.Source.Name, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Component, activity.Source.Name, formatProvider);
         AddAnnotation(builder, WellKnownAnnotations.Common.Operation, activity.DisplayName, formatProvider);
         AddAnnotation(builder, WellKnownAnnotations.Common.Kind, activity.Kind, formatProvider);
 
