@@ -24,6 +24,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\vostok.commons.time\Vostok.Commons.Time\EpochHelper.cs" Link="Commons\EpochHelper.cs" />
+    <Compile Include="..\..\vostok.commons.time\Vostok.Commons.Time\PreciseDateTime.cs">
+      <Link>Commons\PreciseDateTime.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.4" />

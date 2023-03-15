@@ -35,7 +35,9 @@ internal static class HerculesActivityBuilder
             .AddValue(TagNames.TraceId, activity.TraceId.ToGuid())
             .AddValue(TagNames.SpanId, activity.SpanId.ToGuid())
             .AddValue(TagNames.BeginTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(activity.StartTimeUtc))
-            .AddValue(TagNames.EndTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(endTimeUtc));
+            .AddValue(TagNames.BeginTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
+            .AddValue(TagNames.EndTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(endTimeUtc))
+            .AddValue(TagNames.EndTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks);
 
         if (activity.ParentSpanId != default)
             builder.AddValue(TagNames.ParentSpanId, activity.ParentSpanId.ToGuid());
