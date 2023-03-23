@@ -51,7 +51,9 @@ internal static class HerculesActivityBuilder
     private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
     {
         AddAnnotation(builder, WellKnownAnnotations.Common.Component, activity.Source.Name, formatProvider);
-        AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Operation, activity.OperationName, formatProvider);
+        if (!ReferenceEquals(activity.DisplayName, activity.OperationName))
+            AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
         AddAnnotation(builder, WellKnownAnnotations.Common.Kind, activity.Kind, formatProvider);
 
         if (activity.Status != ActivityStatusCode.Unset)
