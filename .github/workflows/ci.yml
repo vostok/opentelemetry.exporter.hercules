@@ -16,4 +16,4 @@ jobs:
     needs: test
     uses: vostok/github.ci/.github/workflows/publish.yml@master
     secrets:
-      token: $\
+      token: ${{ secrets.NUGET_TOKEN }}
