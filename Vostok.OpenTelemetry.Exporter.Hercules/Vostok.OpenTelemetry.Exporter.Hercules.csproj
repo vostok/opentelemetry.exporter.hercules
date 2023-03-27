@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionPrefix>0.1.0</VersionPrefix>
   </PropertyGroup>
   <PropertyGroup>
     <Title>Vostok.OpenTelemetry.Exporter.Hercules</Title>
@@ -29,20 +29,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.4.0-rc.4" />
+    <PackageReference Include="OpenTelemetry" Version="1.4.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Vostok.Hercules.Client.Abstractions">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.hercules.client.abstractions\Vostok.Hercules.Client.Abstractions\bin\Release\netstandard2.0\Vostok.Hercules.Client.Abstractions.dll</HintPath>
+      <HintPath>..\..\vostok.hercules.client.abstractions\Vostok.Hercules.Client.Abstractions\bin\Release\$(ReferencesFramework)\Vostok.Hercules.Client.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Vostok.Tracing.Diagnostics">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.tracing.diagnostics\Vostok.Tracing.Diagnostics\bin\Release\net6.0\Vostok.Tracing.Diagnostics.dll</HintPath>
+      <HintPath>..\..\vostok.tracing.diagnostics\Vostok.Tracing.Diagnostics\bin\Release\$(ReferencesFramework)\Vostok.Tracing.Diagnostics.dll</HintPath>
     </Reference>
     <Reference Include="Vostok.Tracing.Abstractions">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\vostok.tracing.abstractions\Vostok.Tracing.Abstractions\bin\Release\netstandard2.0\Vostok.Tracing.Abstractions.dll</HintPath>
+      <HintPath>..\..\vostok.tracing.abstractions\Vostok.Tracing.Abstractions\bin\Release\$(ReferencesFramework)\Vostok.Tracing.Abstractions.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
