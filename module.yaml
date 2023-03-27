@@ -10,6 +10,7 @@ notests *default:
 
   deps:
     - vostok.commons.time/src
+    - vostok.commons.formatting/src
     - vostok.devtools
     - vostok.hercules.client.abstractions
     - vostok.tracing.abstractions
