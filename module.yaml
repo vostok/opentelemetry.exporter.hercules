@@ -9,10 +9,11 @@ notests *default:
     - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net6.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
 
   deps:
+    - vostok.commons.time/src
+    - vostok.devtools
+    - vostok.hercules.client.abstractions
     - vostok.tracing.abstractions
     - vostok.tracing.diagnostics
-    - vostok.hercules.client.abstractions
-    - vostok.devtools
 
 full-build > notests:
   build:
