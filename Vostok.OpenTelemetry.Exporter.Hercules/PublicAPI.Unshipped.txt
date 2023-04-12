@@ -9,5 +9,7 @@ Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporter.HerculesMetricExpo
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions.CountersStream.get -> string!
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions.CountersStream.set -> void
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions.FinalStream.get -> string!
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions.FinalStream.set -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesMetricExporterOptions.HerculesMetricExporterOptions() -> void
 Vostok.OpenTelemetry.Exporter.Hercules.MeterProviderBuilderExtensions
