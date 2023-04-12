@@ -23,11 +23,6 @@ public class HerculesMetricExporter : BaseExporter<Metric>
     {
         foreach (var metric in batch)
         {
-            Console.WriteLine($"Hercules export {metric.MetricType}");
-            Console.WriteLine($"{metric.Name}");
-            foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                Console.WriteLine($"{metricPoint.StartTime} - {metricPoint.EndTime}");
-
             switch (metric.MetricType)
             {
                 case MetricType.LongSum:
@@ -41,8 +36,12 @@ public class HerculesMetricExporter : BaseExporter<Metric>
                         ExportCounter(metric, metricPoint, metricPoint.GetSumDouble());
                     break;
                 case MetricType.LongGauge:
+                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                        ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueLong());
                     break;
                 case MetricType.DoubleGauge:
+                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                        ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueDouble());
                     break;
                 case MetricType.Histogram:
                     break;
@@ -56,5 +55,11 @@ public class HerculesMetricExporter : BaseExporter<Metric>
     {
         sink.Put(optionsProvider().CountersStream, builder => 
             HerculesMetricBuilder.Build(metric, metricPoint, value, CounterAggregationType, null, ParentProvider!.GetResource(), builder));
+    }
+    
+    private void ExportGauge(Metric metric, MetricPoint metricPoint, double value)
+    {
+        sink.Put(optionsProvider().FinalStream, builder => 
+            HerculesMetricBuilder.Build(metric, metricPoint, value, null, null, ParentProvider!.GetResource(), builder));
     }
 }
