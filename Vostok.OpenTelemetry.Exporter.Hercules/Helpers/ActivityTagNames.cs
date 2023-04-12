@@ -1,6 +1,6 @@
 ﻿namespace Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
 
-internal static class TagNames
+internal static class ActivityTagNames
 {
     public const string TraceId = "traceId";
 
