@@ -1,3 +1,7 @@
+## 1.0.1 (13-04-2023):
+
+Added metrics exporter.
+
 ## 1.0.0 (13-04-2023):
 
 Delete useless `HerculesExporter<T>`.
