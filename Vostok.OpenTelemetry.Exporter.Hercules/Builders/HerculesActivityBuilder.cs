@@ -32,17 +32,17 @@ internal static class HerculesActivityBuilder
         builder.SetTimestamp(endTimeUtc);
 
         builder
-            .AddValue(TagNames.TraceId, activity.TraceId.ToGuid())
-            .AddValue(TagNames.SpanId, activity.SpanId.ToGuid())
-            .AddValue(TagNames.BeginTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(activity.StartTimeUtc))
-            .AddValue(TagNames.BeginTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
-            .AddValue(TagNames.EndTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(endTimeUtc))
-            .AddValue(TagNames.EndTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks);
+            .AddValue(ActivityTagNames.TraceId, activity.TraceId.ToGuid())
+            .AddValue(ActivityTagNames.SpanId, activity.SpanId.ToGuid())
+            .AddValue(ActivityTagNames.BeginTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(activity.StartTimeUtc))
+            .AddValue(ActivityTagNames.BeginTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
+            .AddValue(ActivityTagNames.EndTimestampUtc, EpochHelper.ToUnixTimeUtcTicks(endTimeUtc))
+            .AddValue(ActivityTagNames.EndTimestampUtcOffset, PreciseDateTime.OffsetFromUtc.Ticks);
 
         if (activity.ParentSpanId != default)
-            builder.AddValue(TagNames.ParentSpanId, activity.ParentSpanId.ToGuid());
+            builder.AddValue(ActivityTagNames.ParentSpanId, activity.ParentSpanId.ToGuid());
 
-        builder.AddContainer(TagNames.Annotations, tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
+        builder.AddContainer(ActivityTagNames.Annotations, tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
 
         // todo (kungurtsev, 27.02.2023): send Activity.Events
         // todo (kungurtsev, 27.02.2023): send Activity.Links
