@@ -12,7 +12,7 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 {
     private const string CounterAggregationType = "counter";
     private const string HistogramAggregationType = "histogram";
-    
+
     private readonly IHerculesSink sink;
     private readonly Func<HerculesMetricExporterOptions> optionsProvider;
 
@@ -58,16 +58,18 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 
     private void ExportCounter(Metric metric, MetricPoint metricPoint, double value)
     {
-        sink.Put(optionsProvider().CountersStream, builder => 
-            HerculesMetricBuilder.Build(metric, metricPoint, value, CounterAggregationType, null, ParentProvider!.GetResource(), builder));
+        sink.Put(optionsProvider().CountersStream,
+            builder =>
+                HerculesMetricBuilder.Build(metric, metricPoint, value, CounterAggregationType, null, ParentProvider!.GetResource(), builder));
     }
-    
+
     private void ExportGauge(Metric metric, MetricPoint metricPoint, double value)
     {
-        sink.Put(optionsProvider().FinalStream, builder => 
-            HerculesMetricBuilder.Build(metric, metricPoint, value, null, null, ParentProvider!.GetResource(), builder));
+        sink.Put(optionsProvider().FinalStream,
+            builder =>
+                HerculesMetricBuilder.Build(metric, metricPoint, value, null, null, ParentProvider!.GetResource(), builder));
     }
-    
+
     private void ExportHistogram(Metric metric, MetricPoint metricPoint)
     {
         var bound = double.NegativeInfinity;
@@ -80,12 +82,12 @@ public class HerculesMetricExporter : BaseExporter<Metric>
                     [AggregationParametersNames.LowerBound] = DoubleSerializer.Serialize(bound),
                     [AggregationParametersNames.UpperBound] = DoubleSerializer.Serialize(bucket.ExplicitBound)
                 };
-                sink.Put(optionsProvider().HistogramsStream, builder => 
-                    HerculesMetricBuilder.Build(metric, metricPoint, bucket.BucketCount, HistogramAggregationType, aggregationParameters, ParentProvider!.GetResource(), builder));
+                sink.Put(optionsProvider().HistogramsStream,
+                    builder =>
+                        HerculesMetricBuilder.Build(metric, metricPoint, bucket.BucketCount, HistogramAggregationType, aggregationParameters, ParentProvider!.GetResource(), builder));
             }
 
             bound = bucket.ExplicitBound;
         }
-        
     }
 }
