@@ -8,4 +8,6 @@ public class HerculesMetricExporterOptions
     public string FinalStream { get; set; } = "metrics_final";
     
     public string CountersStream { get; set; } = "metrics_counters";
+    
+    public string HistogramsStream { get; set; } = "metrics_histograms";
 }
