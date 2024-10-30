@@ -21,9 +21,12 @@ public class HerculesActivityExporter : BaseExporter<Activity>
 
     public override ExportResult Export(in Batch<Activity> batch)
     {
-        foreach (var @event in batch)
-            sink.Put(optionsProvider().Stream, builder =>
-                HerculesActivityBuilder.Build(@event, ParentProvider!.GetResource(), builder, optionsProvider().FormatProvider));
+        foreach (var activity in batch)
+        {
+            sink.Put(optionsProvider().Stream,
+                builder =>
+                    HerculesActivityBuilder.Build(activity, ParentProvider.GetResource(), builder, optionsProvider().FormatProvider));
+        }
 
         return ExportResult.Success;
     }

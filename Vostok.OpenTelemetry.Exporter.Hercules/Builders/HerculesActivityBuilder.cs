@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
 using Vostok.Commons.Time;
@@ -13,19 +11,8 @@ using Vostok.Tracing.Diagnostics.Helpers;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 
-/// <summary>
-/// Converts <see cref="Activity"/>s to <see cref="HerculesEvent"/>.
-/// </summary>
-[SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters")]
 internal static class HerculesActivityBuilder
 {
-    public static HerculesEvent Build(Activity activity, Resource resource, IFormatProvider? formatProvider = null)
-    {
-        var builder = new HerculesEventBuilder();
-        Build(activity, resource, builder, formatProvider);
-        return builder.BuildEvent();
-    }
-
     public static void Build(Activity activity, Resource resource, IHerculesEventBuilder builder, IFormatProvider? formatProvider = null)
     {
         var endTimeUtc = activity.StartTimeUtc + activity.Duration;
@@ -50,28 +37,26 @@ internal static class HerculesActivityBuilder
 
     private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
     {
-        AddAnnotation(builder, WellKnownAnnotations.Common.Component, activity.Source.Name, formatProvider);
-        AddAnnotation(builder, WellKnownAnnotations.Common.Operation, activity.OperationName, formatProvider);
-        if (!ReferenceEquals(activity.DisplayName, activity.OperationName))
-            AddAnnotation(builder, "name", activity.DisplayName, formatProvider);
-        AddAnnotation(builder, WellKnownAnnotations.Common.Kind, activity.Kind, formatProvider);
+        AddAnnotation(ActivityTagNames.Scope, activity.Source.Name);
+        AddAnnotation(ActivityTagNames.Name, activity.DisplayName);
+        AddAnnotation(WellKnownAnnotations.Common.Kind, activity.Kind);
 
         if (activity.Status != ActivityStatusCode.Unset)
-            AddAnnotation(builder, WellKnownAnnotations.Common.Status, activity.Status, formatProvider);
+            AddAnnotation(WellKnownAnnotations.Common.Status, activity.Status);
         if (!string.IsNullOrEmpty(activity.StatusDescription))
-            AddAnnotation(builder, "status.description", activity.StatusDescription, formatProvider);
+            AddAnnotation(ActivityTagNames.Error, activity.StatusDescription);
 
         foreach (ref readonly var pair in activity.EnumerateTagObjects())
-            AddAnnotation(builder, pair.Key, pair.Value, formatProvider);
+            AddAnnotation(pair.Key, pair.Value);
 
         foreach (var resourceAttribute in resource.Attributes)
-            AddAnnotation(builder, resourceAttribute.Key, resourceAttribute.Value, formatProvider);
-    }
+            AddAnnotation(resourceAttribute.Key, resourceAttribute.Value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void AddAnnotation(IHerculesTagsBuilder builder, string key, object? value, IFormatProvider? formatProvider)
-    {
-        if (!builder.TryAddObject(key, value))
-            builder.AddValue(key, ObjectValueFormatter.Format(value!, formatProvider: formatProvider!));
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void AddAnnotation(string key, object? value)
+        {
+            if (!builder.TryAddObject(key, value))
+                builder.AddValue(key, ObjectValueFormatter.Format(value!, formatProvider: formatProvider!));
+        }
     }
 }
