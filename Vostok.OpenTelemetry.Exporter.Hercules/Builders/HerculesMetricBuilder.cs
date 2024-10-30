@@ -15,7 +15,7 @@ internal static class HerculesMetricBuilder
 {
     private const string NullValue = "null";
 
-    public static void Build(Metric metric, MetricPoint metricPoint, double value, string? aggregationType, IReadOnlyDictionary<string, string>? aggregationParameters, Resource resource, IHerculesEventBuilder builder)
+    public static void BuildMetric(this IHerculesEventBuilder builder, Metric metric, MetricPoint metricPoint, double value, string? aggregationType, IReadOnlyDictionary<string, string>? aggregationParameters, Resource resource)
     {
         var tags = new List<KeyValuePair<string, string>>(resource.Attributes.Count() + 1 + metricPoint.Tags.Count);
         foreach (var resourceAttribute in resource.Attributes)

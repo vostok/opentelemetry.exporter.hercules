@@ -24,8 +24,7 @@ public class HerculesActivityExporter : BaseExporter<Activity>
         foreach (var activity in batch)
         {
             sink.Put(optionsProvider().Stream,
-                builder =>
-                    HerculesActivityBuilder.Build(activity, ParentProvider.GetResource(), builder, optionsProvider().FormatProvider));
+                builder => builder.BuildActivity(activity, ParentProvider.GetResource(), optionsProvider().FormatProvider));
         }
 
         return ExportResult.Success;

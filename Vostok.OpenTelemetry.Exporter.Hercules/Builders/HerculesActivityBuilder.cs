@@ -13,7 +13,7 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 
 internal static class HerculesActivityBuilder
 {
-    public static void Build(Activity activity, Resource resource, IHerculesEventBuilder builder, IFormatProvider? formatProvider = null)
+    public static void BuildActivity(this IHerculesEventBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider = null)
     {
         var endTimeUtc = activity.StartTimeUtc + activity.Duration;
         builder.SetTimestamp(endTimeUtc);
