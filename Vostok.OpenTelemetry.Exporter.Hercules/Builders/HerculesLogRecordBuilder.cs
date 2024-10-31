@@ -50,9 +50,9 @@ internal static class HerculesLogRecordBuilder
             builder.AddValue(WellKnownProperties.SourceContext, logRecord.CategoryName);
 
         if (logRecord.TraceId != default)
-            builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToGuid());
+            builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToHexString());
         if (logRecord.SpanId != default)
-            builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToGuid());
+            builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToHexString());
 
         if (logRecord.Exception != null)
         {
