@@ -12,6 +12,7 @@ notests *default:
           libraries:
             - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net6.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
   deps:
+    - vostok.logging.abstractions
     - vostok.commons.time/src
     - vostok.commons.formatting/src
     - vostok.devtools
