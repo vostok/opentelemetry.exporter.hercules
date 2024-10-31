@@ -74,14 +74,13 @@ internal static class HerculesLogRecordBuilder
     {
         builder
             .AddValue(ExceptionTagNames.Message, exception.Message)
-            .AddValue(ExceptionTagNames.Type, exception.GetType().FullName);
-        
+            .AddValue(ExceptionTagNames.Type, ExceptionsNormalizer.Normalize(exception.GetType().FullName));
+
         var stackFrames = new StackTrace(exception, true).GetFrames();
-        if (stackFrames != null)
-            builder.AddVectorOfContainers(
-                ExceptionTagNames.StackFrames,
-                stackFrames,
-                (tagsBuilder, frame) => tagsBuilder.AddStackFrameData(frame));
+        builder.AddVectorOfContainers(
+            ExceptionTagNames.StackFrames,
+            stackFrames,
+            (tagsBuilder, frame) => tagsBuilder.AddStackFrameData(frame));
 
         var innerExceptions = new List<Exception>();
 
@@ -91,10 +90,12 @@ internal static class HerculesLogRecordBuilder
             innerExceptions.Add(exception.InnerException);
 
         if (innerExceptions.Count > 0)
+        {
             builder.AddVectorOfContainers(
                 ExceptionTagNames.InnerExceptions,
                 innerExceptions,
                 (tagsBuilder, e) => tagsBuilder.AddExceptionData(e));
+        }
     }
 
     private static void AddStackFrameData(this IHerculesTagsBuilder builder, StackFrame frame)
@@ -102,9 +103,9 @@ internal static class HerculesLogRecordBuilder
         var method = frame.GetMethod();
         if (method != null)
         {
-            builder.AddValue(StackFrameTagNames.Function, method.Name);
+            builder.AddValue(StackFrameTagNames.Function, ExceptionsNormalizer.Normalize(method.Name));
             if (method.DeclaringType != null)
-                builder.AddValue(StackFrameTagNames.Type, method.DeclaringType.FullName);
+                builder.AddValue(StackFrameTagNames.Type, ExceptionsNormalizer.Normalize(method.DeclaringType.FullName));
         }
 
         var fileName = frame.GetFileName();
@@ -125,20 +126,20 @@ internal static class HerculesLogRecordBuilder
         if (logRecord.Attributes is not null)
         {
             foreach (var (key, value) in logRecord.Attributes)
-                AddProperty(key, value);
+                TryAddProperty(key, value);
         }
 
         logRecord.ForEachScope((scope, _) =>
             {
                 foreach (var (key, value) in scope)
-                    AddProperty(key, value);
+                    TryAddProperty(key, value);
             },
             string.Empty);
 
         foreach (var (key, value) in resource.Attributes)
-            AddProperty(key, value);
+            TryAddProperty(key, value);
 
-        void AddProperty(string key, object? value)
+        void TryAddProperty(string key, object? value)
         {
             if (value is null || IsPositionalName(key) || FilteredProperties.Contains(key))
                 return;
