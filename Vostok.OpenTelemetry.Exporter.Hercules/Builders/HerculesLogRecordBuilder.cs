@@ -52,7 +52,7 @@ internal static class HerculesLogRecordBuilder
         if (logRecord.TraceId != default)
             builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToGuid());
         if (logRecord.SpanId != default)
-            builder.AddValue(LogEventTagNames.TraceId, logRecord.SpanId.ToGuid());
+            builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToGuid());
 
         if (logRecord.Exception != null)
         {
