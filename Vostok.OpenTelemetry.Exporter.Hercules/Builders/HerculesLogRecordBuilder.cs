@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
@@ -8,7 +9,6 @@ using Vostok.Commons.Time;
 using Vostok.Hercules.Client.Abstractions.Events;
 using Vostok.Logging.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
-using Vostok.Tracing.Diagnostics.Helpers;
 using MicrosoftLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
@@ -32,7 +32,7 @@ internal static class HerculesLogRecordBuilder
 
     public static void BuildLogRecord(this IHerculesEventBuilder builder, LogRecord logRecord, Resource resource)
     {
-        CheckSpecialAttributes(logRecord, out var hasOriginalFormat, out var hasSourceContext);
+        CheckSpecialAttributes(logRecord, out var originalFormat, out var hasSourceContext);
 
         builder
             .SetTimestamp(logRecord.Timestamp)
@@ -40,8 +40,8 @@ internal static class HerculesLogRecordBuilder
             .AddValue(LogEventTagNames.Level, logRecord.LogLevel.ToString());
 
         // note (ponomaryovigor, 31.10.2024): Body stores template only when "{OriginalFormat}" attribute is present
-        if (hasOriginalFormat && logRecord.Body is not null)
-            builder.AddValue(LogEventTagNames.MessageTemplate, logRecord.Body);
+        if (originalFormat is not null)
+            builder.AddValue(LogEventTagNames.MessageTemplate, originalFormat);
         if (logRecord.FormattedMessage is not null)
             builder.AddValue(LogEventTagNames.Message, logRecord.FormattedMessage);
 
@@ -69,11 +69,55 @@ internal static class HerculesLogRecordBuilder
             tagsBuilder => tagsBuilder.AddProperties(logRecord, resource));
     }
 
+    // note (ponomaryovigor, 31.10.2024): Copied from Vostok.Logging.Hercules
     private static void AddExceptionData(this IHerculesTagsBuilder builder, Exception exception)
     {
         builder
             .AddValue(ExceptionTagNames.Message, exception.Message)
             .AddValue(ExceptionTagNames.Type, exception.GetType().FullName);
+        
+        var stackFrames = new StackTrace(exception, true).GetFrames();
+        if (stackFrames != null)
+            builder.AddVectorOfContainers(
+                ExceptionTagNames.StackFrames,
+                stackFrames,
+                (tagsBuilder, frame) => tagsBuilder.AddStackFrameData(frame));
+
+        var innerExceptions = new List<Exception>();
+
+        if (exception is AggregateException aggregateException)
+            innerExceptions.AddRange(aggregateException.InnerExceptions);
+        else if (exception.InnerException != null)
+            innerExceptions.Add(exception.InnerException);
+
+        if (innerExceptions.Count > 0)
+            builder.AddVectorOfContainers(
+                ExceptionTagNames.InnerExceptions,
+                innerExceptions,
+                (tagsBuilder, e) => tagsBuilder.AddExceptionData(e));
+    }
+
+    private static void AddStackFrameData(this IHerculesTagsBuilder builder, StackFrame frame)
+    {
+        var method = frame.GetMethod();
+        if (method != null)
+        {
+            builder.AddValue(StackFrameTagNames.Function, method.Name);
+            if (method.DeclaringType != null)
+                builder.AddValue(StackFrameTagNames.Type, method.DeclaringType.FullName);
+        }
+
+        var fileName = frame.GetFileName();
+        if (!string.IsNullOrEmpty(fileName))
+            builder.AddValue(StackFrameTagNames.File, fileName);
+
+        var lineNumber = frame.GetFileLineNumber();
+        if (lineNumber > 0)
+            builder.AddValue(StackFrameTagNames.Line, lineNumber);
+
+        var columnNumber = frame.GetFileColumnNumber();
+        if (columnNumber > 0)
+            builder.AddValue(StackFrameTagNames.Column, columnNumber);
     }
 
     private static void AddProperties(this IHerculesTagsBuilder builder, LogRecord logRecord, Resource resource)
@@ -107,9 +151,10 @@ internal static class HerculesLogRecordBuilder
         }
     }
 
-    private static void CheckSpecialAttributes(LogRecord logRecord, out bool hasOriginalFormat, out bool hasSourceContext)
+    private static void CheckSpecialAttributes(LogRecord logRecord, out string? originalFormat, out bool hasSourceContext)
     {
-        hasOriginalFormat = hasSourceContext = false;
+        originalFormat = null;
+        hasSourceContext = false;
 
         if (logRecord.Attributes is null || logRecord.Attributes.Count == 0)
             return;
@@ -118,8 +163,8 @@ internal static class HerculesLogRecordBuilder
         {
             switch (attribute.Key)
             {
-                case OriginalFormat:
-                    hasOriginalFormat = true;
+                case OriginalFormat when attribute.Value is string format:
+                    originalFormat = format;
                     break;
                 case WellKnownProperties.SourceContext:
                     hasSourceContext = true;
