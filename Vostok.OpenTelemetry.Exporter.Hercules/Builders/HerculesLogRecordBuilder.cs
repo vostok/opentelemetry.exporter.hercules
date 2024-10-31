@@ -28,7 +28,6 @@ internal static class HerculesLogRecordBuilder
         // Skip tracing tags as we already writing it from LogRecord value
         LogEventTagNames.TraceId,
         LogEventTagNames.SpanId,
-        "parentId"
     };
 
     public static void BuildLogRecord(this IHerculesEventBuilder builder, LogRecord logRecord, Resource resource)
@@ -38,7 +37,7 @@ internal static class HerculesLogRecordBuilder
         builder
             .SetTimestamp(logRecord.Timestamp)
             .AddValue(LogEventTagNames.UtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
-            .AddValue(LogEventTagNames.Level, ConvertLogLevel(logRecord.LogLevel).ToString());
+            .AddValue(LogEventTagNames.Level, logRecord.LogLevel.ToString());
 
         // note (ponomaryovigor, 31.10.2024): Body stores template only when "{OriginalFormat}" attribute is present
         if (hasOriginalFormat && logRecord.Body is not null)
@@ -52,6 +51,8 @@ internal static class HerculesLogRecordBuilder
 
         if (logRecord.TraceId != default)
             builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToGuid());
+        if (logRecord.SpanId != default)
+            builder.AddValue(LogEventTagNames.TraceId, logRecord.SpanId.ToGuid());
 
         if (logRecord.Exception != null)
         {
@@ -138,15 +139,4 @@ internal static class HerculesLogRecordBuilder
 
         return true;
     }
-
-    private static LogLevel ConvertLogLevel(MicrosoftLogLevel logLevel) =>
-        logLevel switch
-        {
-            MicrosoftLogLevel.Trace or MicrosoftLogLevel.Debug => LogLevel.Debug,
-            MicrosoftLogLevel.Information => LogLevel.Info,
-            MicrosoftLogLevel.Warning => LogLevel.Warn,
-            MicrosoftLogLevel.Error => LogLevel.Error,
-            MicrosoftLogLevel.Critical => LogLevel.Fatal,
-            _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
-        };
 }
