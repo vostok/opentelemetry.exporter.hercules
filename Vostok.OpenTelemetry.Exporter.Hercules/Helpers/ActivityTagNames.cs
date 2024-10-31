@@ -6,8 +6,6 @@ internal static class ActivityTagNames
     public const string SpanId = "spanId";
     public const string ParentSpanId = "parentSpanId";
 
-    public const string Name = "name";
-    public const string Scope = "scope";
     public const string Error = "error";
 
     public const string BeginTimestampUtc = "beginTimestampUtc";
