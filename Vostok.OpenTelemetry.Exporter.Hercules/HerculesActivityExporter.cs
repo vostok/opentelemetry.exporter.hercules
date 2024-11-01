@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using OpenTelemetry;
+using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 
@@ -21,11 +22,11 @@ public class HerculesActivityExporter : BaseExporter<Activity>
 
     public override ExportResult Export(in Batch<Activity> batch)
     {
+        var resource = ParentProvider.GetResource();
+        var options = optionsProvider();
+
         foreach (var activity in batch)
-        {
-            sink.Put(optionsProvider().Stream,
-                builder => builder.BuildActivity(activity, ParentProvider.GetResource(), optionsProvider().FormatProvider));
-        }
+            sink.Put(options.Stream, builder => builder.BuildActivity(activity, resource, options.FormatProvider));
 
         return ExportResult.Success;
     }
