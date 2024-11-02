@@ -15,14 +15,33 @@ internal static class HerculesMetricBuilder
 {
     private const string NullValue = "null";
 
-    public static void BuildMetric(this IHerculesEventBuilder builder, Metric metric, MetricPoint metricPoint, double value, string? aggregationType, IReadOnlyDictionary<string, string>? aggregationParameters, Resource resource)
+    public static void BuildMetric(
+        this IHerculesEventBuilder builder,
+        Resource resource,
+        Metric metric,
+        MetricPoint metricPoint,
+        double value,
+        string? aggregationType,
+        IReadOnlyDictionary<string, string>? aggregationParameters)
     {
-        var tags = new List<KeyValuePair<string, string>>(resource.Attributes.Count() + 1 + metricPoint.Tags.Count);
+        var tagsCount = 1 + resource.Attributes.Count() +
+            metric.MeterTags?.Count() ?? 0 +
+            metricPoint.Tags.Count;
+        var tags = new List<KeyValuePair<string, string>>(tagsCount);
+
+        tags.Add(new(MetricTagNames.Name, metric.Name));
+
         foreach (var resourceAttribute in resource.Attributes)
-            tags.Add(new KeyValuePair<string, string>(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
-        tags.Add(new KeyValuePair<string, string>(MetricTagNames.Name, metric.Name));
+            tags.Add(new(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
+
+        if (metric.MeterTags is not null)
+        {
+            foreach (var meterTag in metric.MeterTags)
+                tags.Add(new(meterTag.Key, meterTag.Value?.ToString() ?? NullValue));
+        }
+
         foreach (var tag in metricPoint.Tags)
-            tags.Add(new KeyValuePair<string, string>(tag.Key, tag.Value.ToString() ?? NullValue));
+            tags.Add(new(tag.Key, tag.Value?.ToString() ?? NullValue));
 
         var hashCode = CalculateHash(tags);
 
@@ -38,6 +57,8 @@ internal static class HerculesMetricBuilder
                 b.AddValue(MetricTagNames.Value, tag.Value);
             });
 
+        builder.AddValue(MetricTagNames.Description, metric.Description);
+
         if (!string.IsNullOrEmpty(metric.Unit))
             builder.AddValue(MetricTagNames.Unit, metric.Unit);
 
@@ -45,6 +66,7 @@ internal static class HerculesMetricBuilder
             builder.AddValue(MetricTagNames.AggregationType, aggregationType);
 
         if (aggregationParameters != null)
+        {
             builder.AddContainer(
                 MetricTagNames.AggregationParameters,
                 b =>
@@ -52,6 +74,7 @@ internal static class HerculesMetricBuilder
                     foreach (var pair in aggregationParameters)
                         b.AddValue(pair.Key, pair.Value);
                 });
+        }
     }
 
     // note (kungurtsev, 12.04.2023): copied from Vostok.Metrics.Models
