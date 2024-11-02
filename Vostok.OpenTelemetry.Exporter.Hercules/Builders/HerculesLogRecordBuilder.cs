@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
-using Vostok.Commons.Time;
 using Vostok.Hercules.Client.Abstractions.Events;
 using Vostok.Logging.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
@@ -37,7 +36,6 @@ internal static class HerculesLogRecordBuilder
     {
         builder
             .SetTimestamp(logRecord.Timestamp)
-            .AddValue(LogEventTagNames.UtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
             .AddValue(LogEventTagNames.Level, logRecord.LogLevel.ToString());
 
         // note (ponomaryovigor, 31.10.2024): Body stores template only when "{OriginalFormat}" attribute is present
