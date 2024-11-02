@@ -2,9 +2,9 @@
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using OpenTelemetry;
 using OpenTelemetry.Logs;
 using Vostok.Hercules.Client.Abstractions;
+using Vostok.OpenTelemetry.Exporter.Hercules.Processors;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
@@ -35,7 +35,7 @@ public static class LoggerProviderBuilderExtensions
 
             var sink = serviceProvider.GetRequiredService<IHerculesSink>();
 
-            return new SimpleLogRecordExportProcessor(new HerculesLogExporter(sink, optionsProvider));
+            return new SimpleNonBlockingExportProcessor<LogRecord>(new HerculesLogExporter(sink, optionsProvider));
         });
 
         return builder;

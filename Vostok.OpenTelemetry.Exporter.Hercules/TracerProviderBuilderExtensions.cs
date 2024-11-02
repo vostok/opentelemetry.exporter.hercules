@@ -2,9 +2,9 @@ using System;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Vostok.Hercules.Client.Abstractions;
+using Vostok.OpenTelemetry.Exporter.Hercules.Processors;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
@@ -35,7 +35,7 @@ public static class TracerProviderBuilderExtensions
 
             var sink = serviceProvider.GetRequiredService<IHerculesSink>();
 
-            return new SimpleActivityExportProcessor(new HerculesActivityExporter(sink, optionsProvider));
+            return new SimpleActivityNonBlockingExportProcessor(new HerculesActivityExporter(sink, optionsProvider));
         });
 
         return builder;
