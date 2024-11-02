@@ -28,31 +28,24 @@ internal static class HerculesLogRecordBuilder
         // Skip tracing tags as we already writing it from LogRecord value
         LogEventTagNames.TraceId,
         LogEventTagNames.SpanId,
+
+        // Some vostok properties
+        WellKnownProperties.TraceContext
     };
 
     public static void BuildLogRecord(this IHerculesEventBuilder builder, LogRecord logRecord, Resource resource)
     {
-        CheckSpecialAttributes(logRecord, out var originalFormat, out var hasSourceContext);
-
         builder
             .SetTimestamp(logRecord.Timestamp)
             .AddValue(LogEventTagNames.UtcOffset, PreciseDateTime.OffsetFromUtc.Ticks)
             .AddValue(LogEventTagNames.Level, logRecord.LogLevel.ToString());
 
         // note (ponomaryovigor, 31.10.2024): Body stores template only when "{OriginalFormat}" attribute is present
+        var originalFormat = GetOriginalFormat(logRecord);
         if (originalFormat is not null)
             builder.AddValue(LogEventTagNames.MessageTemplate, originalFormat);
         if (logRecord.FormattedMessage is not null)
             builder.AddValue(LogEventTagNames.Message, logRecord.FormattedMessage);
-
-        // note (ponomaryovigor, 31.10.2024): Use CategoryName only when Vostok "sourceContext" attribute doesn't present
-        if (!hasSourceContext && !string.IsNullOrEmpty(logRecord.CategoryName))
-            builder.AddValue(WellKnownProperties.SourceContext, logRecord.CategoryName);
-
-        if (logRecord.TraceId != default)
-            builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToHexString());
-        if (logRecord.SpanId != default)
-            builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToHexString());
 
         if (logRecord.Exception != null)
         {
@@ -123,6 +116,13 @@ internal static class HerculesLogRecordBuilder
 
     private static void AddProperties(this IHerculesTagsBuilder builder, LogRecord logRecord, Resource resource)
     {
+        if (!string.IsNullOrEmpty(logRecord.CategoryName))
+            builder.AddValue(WellKnownProperties.SourceContext, logRecord.CategoryName);
+        if (logRecord.TraceId != default)
+            builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToHexString());
+        if (logRecord.SpanId != default)
+            builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToHexString());
+
         if (logRecord.Attributes is not null)
         {
             foreach (var (key, value) in logRecord.Attributes)
@@ -152,26 +152,18 @@ internal static class HerculesLogRecordBuilder
         }
     }
 
-    private static void CheckSpecialAttributes(LogRecord logRecord, out string? originalFormat, out bool hasSourceContext)
+    private static string? GetOriginalFormat(LogRecord logRecord)
     {
-        originalFormat = null;
-        hasSourceContext = false;
-
         if (logRecord.Attributes is null || logRecord.Attributes.Count == 0)
-            return;
+            return null;
 
-        foreach (var attribute in logRecord.Attributes)
+        foreach (var (key, value) in logRecord.Attributes)
         {
-            switch (attribute.Key)
-            {
-                case OriginalFormat when attribute.Value is string format:
-                    originalFormat = format;
-                    break;
-                case WellKnownProperties.SourceContext:
-                    hasSourceContext = true;
-                    break;
-            }
+            if (key is OriginalFormat && value is string format)
+                return format;
         }
+
+        return null;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
