@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using OpenTelemetry;
-using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 

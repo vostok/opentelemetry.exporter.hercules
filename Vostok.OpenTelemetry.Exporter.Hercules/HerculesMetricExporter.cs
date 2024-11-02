@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -9,6 +10,7 @@ using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
+[PublicAPI]
 public class HerculesMetricExporter : BaseExporter<Metric>
 {
     private const string CounterAggregationType = "counter";
