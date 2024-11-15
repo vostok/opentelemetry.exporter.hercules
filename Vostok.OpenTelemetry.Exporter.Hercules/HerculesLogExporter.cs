@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 
@@ -12,6 +13,7 @@ public sealed class HerculesLogExporter : BaseExporter<LogRecord>
 {
     private readonly IHerculesSink sink;
     private readonly Func<HerculesLogExporterOptions> optionsProvider;
+    private Resource? resource;
 
     public HerculesLogExporter(IHerculesSink sink, Func<HerculesLogExporterOptions> optionsProvider)
     {
@@ -21,7 +23,7 @@ public sealed class HerculesLogExporter : BaseExporter<LogRecord>
 
     public override ExportResult Export(in Batch<LogRecord> batch)
     {
-        var resource = ParentProvider.GetResource();
+        resource ??= ParentProvider.GetResource();
 
         foreach (var logRecord in batch)
             sink.Put(optionsProvider().Stream, builder => builder.BuildLogRecord(logRecord, resource));

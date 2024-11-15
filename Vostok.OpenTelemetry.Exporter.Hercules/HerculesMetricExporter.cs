@@ -18,6 +18,7 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 
     private readonly IHerculesSink sink;
     private readonly Func<HerculesMetricExporterOptions> optionsProvider;
+    private Resource? resource;
 
     public HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
     {
@@ -27,7 +28,7 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 
     public override ExportResult Export(in Batch<Metric> batch)
     {
-        var resource = ParentProvider.GetResource();
+        resource ??= ParentProvider.GetResource();
         var options = optionsProvider();
 
         foreach (var metric in batch)
