@@ -29,11 +29,8 @@ public static class MeterProviderBuilderExtensions
 
         name ??= Options.DefaultName;
 
-        builder.ConfigureServices(services =>
-        {
-            if (configureExporter != null)
-                services.Configure(name, configureExporter);
-        });
+        if (configureExporter is not null)
+            builder.ConfigureServices(services => services.Configure(name, configureExporter));
 
         builder.AddReader(serviceProvider =>
         {

@@ -23,11 +23,8 @@ public static class LoggerProviderBuilderExtensions
 
         name ??= Options.DefaultName;
 
-        builder.ConfigureServices(services =>
-        {
-            if (configure != null)
-                services.Configure(name, configure);
-        });
+        if (configure is not null)
+            builder.ConfigureServices(services => services.Configure(name, configure));
 
         builder.AddProcessor(serviceProvider =>
         {

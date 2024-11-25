@@ -24,9 +24,10 @@ public sealed class HerculesLogExporter : BaseExporter<LogRecord>
     public override ExportResult Export(in Batch<LogRecord> batch)
     {
         resource ??= ParentProvider.GetResource();
+        var options = optionsProvider();
 
         foreach (var logRecord in batch)
-            sink.Put(optionsProvider().Stream, builder => builder.BuildLogRecord(logRecord, resource));
+            sink.Put(options.Stream, builder => builder.BuildLogRecord(logRecord, resource));
 
         return ExportResult.Success;
     }
