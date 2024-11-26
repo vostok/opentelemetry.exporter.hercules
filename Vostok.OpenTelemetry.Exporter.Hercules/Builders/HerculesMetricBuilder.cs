@@ -29,16 +29,16 @@ internal static class HerculesMetricBuilder
             metricPoint.Tags.Count;
         var tags = new List<KeyValuePair<string, string>>(tagsCount);
 
-        tags.Add(new(MetricTagNames.Name, metric.Name));
-
         foreach (var resourceAttribute in resource.Attributes)
-            tags.Add(new(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
+            tags.Add(new KeyValuePair<string, string>(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
 
         if (metric.MeterTags is not null)
         {
             foreach (var meterTag in metric.MeterTags)
                 tags.Add(new(meterTag.Key, meterTag.Value?.ToString() ?? NullValue));
         }
+
+        tags.Add(new KeyValuePair<string, string>(MetricTagNames.Name, metric.Name));
 
         foreach (var tag in metricPoint.Tags)
             tags.Add(new(tag.Key, tag.Value?.ToString() ?? NullValue));
