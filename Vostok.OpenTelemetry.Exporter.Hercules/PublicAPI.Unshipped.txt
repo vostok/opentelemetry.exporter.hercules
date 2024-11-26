@@ -1,11 +1,14 @@
 override Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporter.Export(in OpenTelemetry.Batch<OpenTelemetry.Logs.LogRecord!> batch) -> OpenTelemetry.ExportResult
-static Vostok.OpenTelemetry.Exporter.Hercules.LoggerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder) -> OpenTelemetry.Logs.LoggerProviderBuilder!
-static Vostok.OpenTelemetry.Exporter.Hercules.LoggerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder, string? name, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>? configure) -> OpenTelemetry.Logs.LoggerProviderBuilder!
-static Vostok.OpenTelemetry.Exporter.Hercules.LoggerProviderBuilderExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>? configure) -> OpenTelemetry.Logs.LoggerProviderBuilder!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder) -> OpenTelemetry.Logs.LoggerProviderBuilder!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder, string? name, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>? configure) -> OpenTelemetry.Logs.LoggerProviderBuilder!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.LoggerProviderBuilder! builder, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>! configure) -> OpenTelemetry.Logs.LoggerProviderBuilder!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.OpenTelemetryLoggerOptions! options) -> OpenTelemetry.Logs.OpenTelemetryLoggerOptions!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.OpenTelemetryLoggerOptions! options, string? name, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>? configure) -> OpenTelemetry.Logs.OpenTelemetryLoggerOptions!
+static Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions.AddHerculesExporter(this OpenTelemetry.Logs.OpenTelemetryLoggerOptions! options, System.Action<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>! configure) -> OpenTelemetry.Logs.OpenTelemetryLoggerOptions!
+Vostok.OpenTelemetry.Exporter.Hercules.HerculesExporterLoggingExtensions
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporter
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporter.HerculesLogExporter(Vostok.Hercules.Client.Abstractions.IHerculesSink! sink, System.Func<Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions!>! optionsProvider) -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions.HerculesLogExporterOptions() -> void
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions.Stream.get -> string!
 Vostok.OpenTelemetry.Exporter.Hercules.HerculesLogExporterOptions.Stream.set -> void
-Vostok.OpenTelemetry.Exporter.Hercules.LoggerProviderBuilderExtensions
