@@ -18,7 +18,7 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 
     private readonly IHerculesSink sink;
     private readonly Func<HerculesMetricExporterOptions> optionsProvider;
-    private Resource? resource;
+    private Resource resource = null!;
 
     public HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
     {
@@ -28,16 +28,18 @@ public class HerculesMetricExporter : BaseExporter<Metric>
 
     public override ExportResult Export(in Batch<Metric> batch)
     {
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
         resource ??= ParentProvider.GetResource();
+
         var options = optionsProvider();
 
         foreach (var metric in batch)
-            ExportMetric(metric, resource, options);
+            ExportMetric(metric, options);
 
         return ExportResult.Success;
     }
 
-    private void ExportMetric(Metric metric, Resource resource, HerculesMetricExporterOptions options)
+    private void ExportMetric(Metric metric, HerculesMetricExporterOptions options)
     {
         // note (ponomaryovigor, 02.11.2024): ExponentialHistogram not supported
         switch (metric.MetricType)
@@ -45,51 +47,41 @@ public class HerculesMetricExporter : BaseExporter<Metric>
             case MetricType.LongSum:
             case MetricType.LongSumNonMonotonic:
                 foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                    ExportCounter(metric, metricPoint, metricPoint.GetSumLong(), resource, options);
+                    ExportCounter(metric, metricPoint, metricPoint.GetSumLong(), options);
                 break;
             case MetricType.DoubleSum:
             case MetricType.DoubleSumNonMonotonic:
                 foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                    ExportCounter(metric, metricPoint, metricPoint.GetSumDouble(), resource, options);
+                    ExportCounter(metric, metricPoint, metricPoint.GetSumDouble(), options);
                 break;
             case MetricType.LongGauge:
                 foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueLong(), resource, options);
+                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueLong(), options);
                 break;
             case MetricType.DoubleGauge:
                 foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueDouble(), resource, options);
+                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueDouble(), options);
                 break;
             case MetricType.Histogram:
                 foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                    ExportHistogram(metric, metricPoint, resource, options);
+                    ExportHistogram(metric, metricPoint, options);
                 break;
         }
     }
 
-    private void ExportCounter(
-        Metric metric,
-        MetricPoint metricPoint,
-        double value,
-        Resource resource,
-        HerculesMetricExporterOptions options)
+    private void ExportCounter(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
         sink.Put(options.CountersStream,
             builder => builder.BuildMetric(resource, metric, metricPoint, value, CounterAggregationType, null));
     }
 
-    private void ExportGauge(
-        Metric metric,
-        MetricPoint metricPoint,
-        double value,
-        Resource resource,
-        HerculesMetricExporterOptions options)
+    private void ExportGauge(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
         sink.Put(options.FinalStream,
             builder => builder.BuildMetric(resource, metric, metricPoint, value, null, null));
     }
 
-    private void ExportHistogram(Metric metric, MetricPoint metricPoint, Resource resource, HerculesMetricExporterOptions options)
+    private void ExportHistogram(Metric metric, MetricPoint metricPoint, HerculesMetricExporterOptions options)
     {
         var aggregationParameters = new Dictionary<string, string>(2);
 
