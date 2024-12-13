@@ -9,7 +9,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>1.0.3</VersionPrefix>
+    <VersionPrefix>1.0.4</VersionPrefix>
   </PropertyGroup>
   <PropertyGroup>
     <Title>Vostok.OpenTelemetry.Exporter.Hercules</Title>
