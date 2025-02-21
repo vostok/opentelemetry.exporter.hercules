@@ -64,6 +64,7 @@ public static class HerculesExporterLoggingExtensions
             var exporterOptions = optionsMonitor.Get(name);
             configure?.Invoke(exporterOptions);
 
+            // todo: Do we need this?
             optionsMonitor.OnChange((newOptions, newOptionsName) =>
             {
                 if (name != newOptionsName)

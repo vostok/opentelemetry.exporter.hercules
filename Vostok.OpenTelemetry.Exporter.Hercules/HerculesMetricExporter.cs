@@ -11,20 +11,13 @@ using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
-public class HerculesMetricExporter : BaseExporter<Metric>
+public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
+    : BaseExporter<Metric>
 {
     private const string CounterAggregationType = "counter";
     private const string HistogramAggregationType = "histogram";
 
-    private readonly IHerculesSink sink;
-    private readonly Func<HerculesMetricExporterOptions> optionsProvider;
     private Resource resource = null!;
-
-    public HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
-    {
-        this.sink = sink;
-        this.optionsProvider = optionsProvider;
-    }
 
     public override ExportResult Export(in Batch<Metric> batch)
     {

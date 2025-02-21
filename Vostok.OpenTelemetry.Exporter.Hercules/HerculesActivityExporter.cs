@@ -9,17 +9,10 @@ using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
-public class HerculesActivityExporter : BaseExporter<Activity>
+public class HerculesActivityExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
+    : BaseExporter<Activity>
 {
-    private readonly IHerculesSink sink;
-    private readonly Func<HerculesActivityExporterOptions> optionsProvider;
     private Resource? resource;
-
-    public HerculesActivityExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
-    {
-        this.sink = sink;
-        this.optionsProvider = optionsProvider;
-    }
 
     public override ExportResult Export(in Batch<Activity> batch)
     {

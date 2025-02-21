@@ -8,7 +8,6 @@ using Vostok.Commons.Formatting;
 using Vostok.Hercules.Client.Abstractions.Events;
 using Vostok.Logging.Abstractions;
 using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
-using MicrosoftLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
 
