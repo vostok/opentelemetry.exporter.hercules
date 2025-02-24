@@ -1,12 +1,12 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Helpers.Extensions;
 using Vostok.Hercules.Client.Abstractions.Events;
-using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
 
-namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
+namespace Vostok.OpenTelemetry.Exporter.Hercules.Metrics;
 
 /// <summary>
 /// Converts <see cref="Metric"/>s to <see cref="HerculesEvent"/>.
@@ -24,29 +24,12 @@ internal static class HerculesMetricBuilder
         string? aggregationType,
         IReadOnlyDictionary<string, string>? aggregationParameters)
     {
-        var tagsCount = 1 + resource.Attributes.Count() +
-            metric.MeterTags?.Count() ?? 0 +
-            metricPoint.Tags.Count;
-        var tags = new List<KeyValuePair<string, string>>(tagsCount);
-
-        foreach (var resourceAttribute in resource.Attributes)
-            tags.Add(new KeyValuePair<string, string>(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
-
-        if (metric.MeterTags is not null)
-        {
-            foreach (var meterTag in metric.MeterTags)
-                tags.Add(new(meterTag.Key, meterTag.Value?.ToString() ?? NullValue));
-        }
-
-        tags.Add(new KeyValuePair<string, string>(MetricTagNames.Name, metric.Name));
-
-        foreach (var tag in metricPoint.Tags)
-            tags.Add(new(tag.Key, tag.Value?.ToString() ?? NullValue));
-
-        var hashCode = CalculateHash(tags);
-
         builder.SetTimestamp(metricPoint.EndTime);
         builder.AddValue(MetricTagNames.Value, value);
+
+        var tags = GetTags(resource, metric, metricPoint);
+        var hashCode = CalculateHash(tags);
+
         builder.AddValue(MetricTagNames.TagsHash, hashCode);
         builder.AddVectorOfContainers(
             MetricTagNames.Tags,
@@ -56,8 +39,6 @@ internal static class HerculesMetricBuilder
                 b.AddValue(MetricTagNames.Key, tag.Key);
                 b.AddValue(MetricTagNames.Value, tag.Value);
             });
-
-        builder.AddValue(MetricTagNames.Description, metric.Description);
 
         if (!string.IsNullOrEmpty(metric.Unit))
             builder.AddValue(MetricTagNames.Unit, metric.Unit);
@@ -77,17 +58,44 @@ internal static class HerculesMetricBuilder
         }
     }
 
+    [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeNotEvident")]
+    private static List<KeyValuePair<string, string>> GetTags(Resource resource, Metric metric, MetricPoint metricPoint)
+    {
+        var tagsCount = 1 + resource.Attributes.Count() +
+            metric.MeterTags?.Count() ?? 0 +
+            metricPoint.Tags.Count;
+
+        var tags = new List<KeyValuePair<string, string>>(tagsCount)
+        {
+            new(MetricTagNames.Name, metric.Name)
+        };
+
+        foreach (var resourceAttribute in resource.Attributes)
+            tags.Add(new(resourceAttribute.Key, resourceAttribute.Value.ToString() ?? NullValue));
+
+        if (metric.MeterTags is not null)
+        {
+            foreach (var meterTag in metric.MeterTags)
+                tags.Add(new(meterTag.Key, meterTag.Value?.ToString() ?? NullValue));
+        }
+
+        foreach (var tag in metricPoint.Tags)
+            tags.Add(new(tag.Key, tag.Value?.ToString() ?? NullValue));
+
+        return tags;
+    }
+
     // note (kungurtsev, 12.04.2023): copied from Vostok.Metrics.Models
     private static int CalculateHash(List<KeyValuePair<string, string>> tags)
     {
-        return tags.Aggregate(tags.Count, (hash, tag) => (hash * 397) ^ CalculateHash(tag));
-    }
+        return tags.Aggregate(tags.Count, (hash, tag) => (hash * 397) ^ Hash(tag));
 
-    private static int CalculateHash(KeyValuePair<string, string> tag)
-    {
-        unchecked
+        static int Hash(KeyValuePair<string, string> tag)
         {
-            return (tag.Key.GetStableHashCode() * 397) ^ tag.Value.GetStableHashCode();
+            unchecked
+            {
+                return (tag.Key.GetStableHashCode() * 397) ^ tag.Value.GetStableHashCode();
+            }
         }
     }
 }

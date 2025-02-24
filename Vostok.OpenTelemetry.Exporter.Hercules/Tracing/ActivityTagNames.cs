@@ -1,4 +1,4 @@
-﻿namespace Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+﻿namespace Vostok.OpenTelemetry.Exporter.Hercules.Tracing;
 
 internal static class ActivityTagNames
 {

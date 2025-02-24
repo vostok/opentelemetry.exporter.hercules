@@ -14,10 +14,15 @@ public static class TracerProviderBuilderExtensions
     public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder) =>
         builder.AddHerculesExporter(null, null);
 
-    public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder, Action<HerculesActivityExporterOptions>? configure) =>
+    public static TracerProviderBuilder AddHerculesExporter(
+        this TracerProviderBuilder builder,
+        Action<HerculesActivityExporterOptions>? configure) =>
         builder.AddHerculesExporter(null, configure);
 
-    public static TracerProviderBuilder AddHerculesExporter(this TracerProviderBuilder builder, string? name, Action<HerculesActivityExporterOptions>? configure)
+    public static TracerProviderBuilder AddHerculesExporter(
+        this TracerProviderBuilder builder,
+        string? name,
+        Action<HerculesActivityExporterOptions>? configure)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
@@ -28,11 +33,10 @@ public static class TracerProviderBuilderExtensions
 
         builder.AddProcessor(serviceProvider =>
         {
-            var optionsProvider = () => serviceProvider.GetRequiredService<IOptionsMonitor<HerculesActivityExporterOptions>>().Get(name);
-
             var sink = serviceProvider.GetRequiredService<IHerculesSink>();
+            var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<HerculesActivityExporterOptions>>();
 
-            return new SimpleActivityNonBlockingExportProcessor(new HerculesActivityExporter(sink, optionsProvider));
+            return new SimpleActivityNonBlockingExportProcessor(new HerculesActivityExporter(sink, () => optionsMonitor.Get(name)));
         });
 
         return builder;

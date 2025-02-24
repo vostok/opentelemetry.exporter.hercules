@@ -1,4 +1,4 @@
-namespace Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+namespace Vostok.OpenTelemetry.Exporter.Hercules.Metrics;
 
 internal static class MetricTagNames
 {
@@ -8,7 +8,6 @@ internal static class MetricTagNames
     public const string Tags = "tags";
     public const string TagsHash = "tagsHash";
     public const string Unit = "unit";
-    public const string Description = "description";
     public const string AggregationType = "aggregationType";
     public const string AggregationParameters = "aggregationParameters";
 }

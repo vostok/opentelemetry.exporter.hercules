@@ -5,8 +5,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
-using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
-using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+using Vostok.OpenTelemetry.Exporter.Hercules.Metrics;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
@@ -17,12 +16,12 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
     private const string CounterAggregationType = "counter";
     private const string HistogramAggregationType = "histogram";
 
-    private Resource resource = null!;
+    private Resource _resource = null!;
 
     public override ExportResult Export(in Batch<Metric> batch)
     {
         // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
-        resource ??= ParentProvider.GetResource();
+        _resource ??= ParentProvider.GetResource();
 
         var options = optionsProvider();
 
@@ -65,13 +64,13 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
     private void ExportCounter(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
         sink.Put(options.CountersStream,
-            builder => builder.BuildMetric(resource, metric, metricPoint, value, CounterAggregationType, null));
+            builder => builder.BuildMetric(_resource, metric, metricPoint, value, CounterAggregationType, null));
     }
 
     private void ExportGauge(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
         sink.Put(options.FinalStream,
-            builder => builder.BuildMetric(resource, metric, metricPoint, value, null, null));
+            builder => builder.BuildMetric(_resource, metric, metricPoint, value, null, null));
     }
 
     private void ExportHistogram(Metric metric, MetricPoint metricPoint, HerculesMetricExporterOptions options)
@@ -83,12 +82,12 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
         {
             if (bucket.BucketCount != 0)
             {
-                aggregationParameters[AggregationParametersNames.LowerBound] = DoubleSerializer.Serialize(lowerBound);
-                aggregationParameters[AggregationParametersNames.UpperBound] = DoubleSerializer.Serialize(bucket.ExplicitBound);
+                aggregationParameters[AggregationHelper.LowerBoundKey] = AggregationHelper.SerializeDouble(lowerBound);
+                aggregationParameters[AggregationHelper.UpperBoundKey] = AggregationHelper.SerializeDouble(bucket.ExplicitBound);
 
                 sink.Put(options.HistogramsStream,
                     builder => builder.BuildMetric(
-                        resource,
+                        _resource,
                         metric,
                         metricPoint,
                         bucket.BucketCount,

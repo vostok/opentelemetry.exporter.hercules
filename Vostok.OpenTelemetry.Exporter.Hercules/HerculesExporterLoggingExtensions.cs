@@ -33,11 +33,10 @@ public static class HerculesExporterLoggingExtensions
 
         builder.AddProcessor(serviceProvider =>
         {
-            var optionsProvider = () => serviceProvider.GetRequiredService<IOptionsMonitor<HerculesLogExporterOptions>>().Get(name);
-
+            var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<HerculesLogExporterOptions>>();
             var sink = serviceProvider.GetRequiredService<IHerculesSink>();
 
-            return new SimpleNonBlockingExportProcessor<LogRecord>(new HerculesLogExporter(sink, optionsProvider));
+            return new SimpleNonBlockingExportProcessor<LogRecord>(new HerculesLogExporter(sink, () => optionsMonitor.Get(name)));
         });
 
         return builder;
@@ -64,7 +63,6 @@ public static class HerculesExporterLoggingExtensions
             var exporterOptions = optionsMonitor.Get(name);
             configure?.Invoke(exporterOptions);
 
-            // todo: Do we need this?
             optionsMonitor.OnChange((newOptions, newOptionsName) =>
             {
                 if (name != newOptionsName)

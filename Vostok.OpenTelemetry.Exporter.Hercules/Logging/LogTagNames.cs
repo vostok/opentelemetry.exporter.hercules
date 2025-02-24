@@ -1,14 +1,16 @@
-﻿namespace Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+﻿namespace Vostok.OpenTelemetry.Exporter.Hercules.Logging;
 
 internal static class LogEventTagNames
 {
+    public const string OriginalFormat = "{OriginalFormat}";
+
     public const string Exception = "exception";
     public const string MessageTemplate = "messageTemplate";
     public const string Message = "message";
     public const string Properties = "properties";
     public const string Level = "level";
     public const string StackTrace = "stackTrace";
-    
+
     public const string TraceId = "traceId";
     public const string SpanId = "spanId";
 }

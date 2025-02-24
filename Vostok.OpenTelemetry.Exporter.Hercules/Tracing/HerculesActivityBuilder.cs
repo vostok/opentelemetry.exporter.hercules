@@ -5,15 +5,18 @@ using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
 using Vostok.Commons.Time;
 using Vostok.Hercules.Client.Abstractions.Events;
-using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
 using Vostok.Tracing.Abstractions;
 using Vostok.Tracing.Diagnostics.Helpers;
 
-namespace Vostok.OpenTelemetry.Exporter.Hercules.Builders;
+namespace Vostok.OpenTelemetry.Exporter.Hercules.Tracing;
 
 internal static class HerculesActivityBuilder
 {
-    public static void BuildActivity(this IHerculesEventBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider = null)
+    public static void BuildActivity(
+        this IHerculesEventBuilder builder,
+        Activity activity,
+        Resource resource,
+        IFormatProvider? formatProvider = null)
     {
         var endTimeUtc = activity.StartTimeUtc + activity.Duration;
         builder.SetTimestamp(endTimeUtc);
@@ -29,20 +32,25 @@ internal static class HerculesActivityBuilder
         if (activity.ParentSpanId != default)
             builder.AddValue(ActivityTagNames.ParentSpanId, activity.ParentSpanId.ToGuid());
 
-        builder.AddContainer(ActivityTagNames.Annotations, tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
+        builder.AddContainer(ActivityTagNames.Annotations,
+            tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
 
         // todo (kungurtsev, 27.02.2023): send Activity.Events
         // todo (kungurtsev, 27.02.2023): send Activity.Links
     }
 
-    private static void BuildAnnotationsContainer(IHerculesTagsBuilder builder, Activity activity, Resource resource, IFormatProvider? formatProvider)
+    private static void BuildAnnotationsContainer(
+        IHerculesTagsBuilder builder,
+        Activity activity,
+        Resource resource,
+        IFormatProvider? formatProvider)
     {
         AddAnnotation(WellKnownAnnotations.Common.Component, activity.Source.Name);
         AddAnnotation(WellKnownAnnotations.Common.Operation, activity.DisplayName);
         AddAnnotation(WellKnownAnnotations.Common.Kind, activity.Kind);
 
         if (activity.Status != ActivityStatusCode.Unset)
-            AddAnnotation(WellKnownAnnotations.Common.Status, activity.Status);
+            AddAnnotation(WellKnownAnnotations.Common.Status, activity.Status.ToString());
         if (!string.IsNullOrEmpty(activity.StatusDescription))
             AddAnnotation(ActivityTagNames.Error, activity.StatusDescription);
 
@@ -51,6 +59,8 @@ internal static class HerculesActivityBuilder
 
         foreach (var resourceAttribute in resource.Attributes)
             AddAnnotation(resourceAttribute.Key, resourceAttribute.Value);
+
+        return;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void AddAnnotation(string key, object? value)

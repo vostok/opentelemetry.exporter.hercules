@@ -7,7 +7,7 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules.Processors;
 /// Export single item without thread blocking.
 /// </summary>
 /// <remarks><see cref="SimpleExportProcessor{T}" /> blocks current thread on every export call.
-/// We can avoid it because <see cref="IHerculesSink" /> is thread safe and nonblocking.</remarks>
+/// We can avoid this because <see cref="IHerculesSink" /> is thread safe and nonblocking.</remarks>
 internal class SimpleNonBlockingExportProcessor<T>(BaseExporter<T> exporter) : BaseExportProcessor<T>(exporter)
     where T : class
 {

@@ -3,13 +3,9 @@ using OpenTelemetry;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Processors;
 
-internal sealed class SimpleActivityNonBlockingExportProcessor : SimpleNonBlockingExportProcessor<Activity>
+internal sealed class SimpleActivityNonBlockingExportProcessor(BaseExporter<Activity> exporter)
+    : SimpleNonBlockingExportProcessor<Activity>(exporter)
 {
-    public SimpleActivityNonBlockingExportProcessor(BaseExporter<Activity> exporter)
-        : base(exporter)
-    {
-    }
-
     /// <inheritdoc />
     public override void OnEnd(Activity data)
     {
