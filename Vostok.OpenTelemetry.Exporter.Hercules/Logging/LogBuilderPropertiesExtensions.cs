@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
 using Vostok.Hercules.Client.Abstractions.Events;
 using Vostok.Logging.Abstractions;
+using Vostok.Logging.Abstractions.Values;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Logging;
 
@@ -27,8 +29,14 @@ internal static class LogBuilderPropertiesExtensions
         WellKnownProperties.TraceContext
     };
 
-    public static void AddProperties(this IHerculesTagsBuilder builder, LogRecord logRecord, Resource resource)
+    public static void AddProperties(
+        this IHerculesTagsBuilder builder,
+        LogRecord logRecord,
+        Resource resource,
+        out string? messageTemplate)
     {
+        messageTemplate = null;
+
         if (!string.IsNullOrEmpty(logRecord.CategoryName))
             builder.AddValue(WellKnownProperties.SourceContext, logRecord.CategoryName);
         if (logRecord.TraceId != default)
@@ -39,32 +47,41 @@ internal static class LogBuilderPropertiesExtensions
         if (logRecord.Attributes is not null)
         {
             foreach (var (key, value) in logRecord.Attributes)
-                TryAddProperty(key, value);
+            {
+                if (messageTemplate is null && key is LogEventTagNames.OriginalFormat && value is string format)
+                {
+                    messageTemplate = format;
+                    continue;
+                }
+
+                // if (value is OperationContextValue operationContext)
+                    // value = operationContext.Select(context => context).ToString();
+
+                AddProperty(builder, key, value);
+            }
         }
 
-        logRecord.ForEachScope((scope, _) =>
+        logRecord.ForEachScope((scope, providedBuilder) =>
             {
                 foreach (var (key, value) in scope)
-                    TryAddProperty(key, value);
+                    AddProperty(providedBuilder, key, value);
             },
-            string.Empty);
+            builder);
 
         foreach (var (key, value) in resource.Attributes)
-            TryAddProperty(key, value);
+            AddProperty(builder, key, value);
+    }
 
-        return;
+    private static void AddProperty(IHerculesTagsBuilder builder, string key, object? value)
+    {
+        if (value is null || IsPositionalName(key) || FilteredProperties.Contains(key))
+            return;
 
-        void TryAddProperty(string key, object? value)
-        {
-            if (value is null || IsPositionalName(key) || FilteredProperties.Contains(key))
-                return;
+        if (builder.TryAddObject(key, value))
+            return;
 
-            if (builder.TryAddObject(key, value))
-                return;
-
-            var format = value is DateTime or DateTimeOffset ? "O" : null;
-            builder.AddValue(key, ObjectValueFormatter.Format(value, format!));
-        }
+        var format = value is DateTime or DateTimeOffset ? "O" : null;
+        builder.AddValue(key, ObjectValueFormatter.Format(value, format!));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
