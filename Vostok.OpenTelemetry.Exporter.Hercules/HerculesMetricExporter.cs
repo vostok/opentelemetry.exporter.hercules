@@ -13,9 +13,6 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules;
 public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
     : BaseExporter<Metric>
 {
-    private const string CounterAggregationType = "counter";
-    private const string HistogramAggregationType = "histogram";
-
     private Resource _resource = null!;
 
     public override ExportResult Export(in Batch<Metric> batch)
@@ -64,7 +61,7 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
     private void ExportCounter(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
         sink.Put(options.CountersStream,
-            builder => builder.BuildMetric(_resource, metric, metricPoint, value, CounterAggregationType, null));
+            builder => builder.BuildMetric(_resource, metric, metricPoint, value, AggregationTypes.Counter, null));
     }
 
     private void ExportGauge(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
@@ -91,7 +88,7 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
                         metric,
                         metricPoint,
                         bucket.BucketCount,
-                        HistogramAggregationType,
+                        AggregationTypes.Histogram,
                         aggregationParameters));
             }
 
