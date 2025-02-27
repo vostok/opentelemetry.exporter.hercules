@@ -17,10 +17,13 @@ public sealed class HerculesLogExporter(IHerculesSink sink, Func<HerculesLogExpo
     public override ExportResult Export(in Batch<LogRecord> batch)
     {
         _resource ??= ParentProvider.GetResource();
-        var options = optionsProvider();
 
-        foreach (var logRecord in batch)
-            sink.Put(options.Stream, builder => builder.BuildLogRecord(logRecord, _resource));
+        var options = optionsProvider();
+        if (options.Enabled)
+        {
+            foreach (var logRecord in batch)
+                sink.Put(options.Stream, builder => builder.BuildLogRecord(logRecord, _resource));
+        }
 
         return ExportResult.Success;
     }

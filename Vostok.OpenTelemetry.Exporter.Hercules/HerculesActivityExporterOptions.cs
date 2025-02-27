@@ -1,9 +1,11 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
+[SuppressMessage("ApiDesign", "RS0016:Добавьте открытые типы и элементы в объявленный API")]
 public class HerculesActivityExporterOptions
 {
     /// <summary>
@@ -15,4 +17,6 @@ public class HerculesActivityExporterOptions
     /// If specified, this <see cref="IFormatProvider"/> will be used when formatting annotation values to strings.
     /// </summary>
     public IFormatProvider? FormatProvider { get; set; }
+
+    public bool Enabled { get; set; } = true;
 }

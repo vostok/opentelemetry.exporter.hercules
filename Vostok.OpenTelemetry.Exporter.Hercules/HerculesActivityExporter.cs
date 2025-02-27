@@ -17,10 +17,13 @@ public class HerculesActivityExporter(IHerculesSink sink, Func<HerculesActivityE
     public override ExportResult Export(in Batch<Activity> batch)
     {
         _resource ??= ParentProvider.GetResource();
-        var options = optionsProvider();
 
-        foreach (var activity in batch)
-            sink.Put(options.Stream, builder => builder.BuildActivity(activity, _resource, options.FormatProvider));
+        var options = optionsProvider();
+        if (options.Enabled)
+        {
+            foreach (var activity in batch)
+                sink.Put(options.Stream, builder => builder.BuildActivity(activity, _resource, options.FormatProvider));
+        }
 
         return ExportResult.Success;
     }

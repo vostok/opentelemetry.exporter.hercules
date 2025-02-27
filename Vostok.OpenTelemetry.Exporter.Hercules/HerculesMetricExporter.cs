@@ -21,9 +21,11 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
         _resource ??= ParentProvider.GetResource();
 
         var options = optionsProvider();
-
-        foreach (var metric in batch)
-            ExportMetric(metric, options);
+        if (options.Enabled)
+        {
+            foreach (var metric in batch)
+                ExportMetric(metric, options);
+        }
 
         return ExportResult.Success;
     }
