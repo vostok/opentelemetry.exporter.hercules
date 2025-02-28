@@ -22,7 +22,7 @@ public sealed class HerculesLogExporter(IHerculesSink sink, Func<HerculesLogExpo
         if (options.Enabled)
         {
             foreach (var logRecord in batch)
-                sink.Put(options.Stream, builder => builder.BuildLogRecord(logRecord, _resource));
+                sink.Put(options.Stream, builder => builder.BuildLogRecord(logRecord, _resource, options.FormatProvider));
         }
 
         return ExportResult.Success;

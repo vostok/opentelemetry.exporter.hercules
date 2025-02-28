@@ -1,4 +1,5 @@
-﻿using OpenTelemetry.Logs;
+﻿using System;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions.Events;
 
@@ -6,7 +7,11 @@ namespace Vostok.OpenTelemetry.Exporter.Hercules.Logging;
 
 internal static class HerculesLogRecordBuilder
 {
-    public static void BuildLogRecord(this IHerculesEventBuilder builder, LogRecord logRecord, Resource resource)
+    public static void BuildLogRecord(
+        this IHerculesEventBuilder builder,
+        LogRecord logRecord,
+        Resource resource,
+        IFormatProvider? formatProvider)
     {
         builder.SetTimestamp(logRecord.Timestamp)
                .AddValue(LogEventTagNames.Level, logRecord.LogLevel.ToString());
@@ -14,7 +19,7 @@ internal static class HerculesLogRecordBuilder
         string? messageTemplate = null;
         builder.AddContainer(
             LogEventTagNames.Properties,
-            tagsBuilder => tagsBuilder.AddProperties(logRecord, resource, out messageTemplate));
+            tagsBuilder => tagsBuilder.AddProperties(logRecord, resource, formatProvider, out messageTemplate));
 
         messageTemplate ??= logRecord.Body;
         if (messageTemplate is not null)

@@ -66,7 +66,7 @@ internal static class HerculesActivityBuilder
         void AddAnnotation(string key, object? value)
         {
             if (!builder.TryAddObject(key, value))
-                builder.AddValue(key, ObjectValueFormatter.Format(value!, formatProvider: formatProvider!));
+                builder.AddValue(key, ObjectValueFormatter.Format(value, formatProvider: formatProvider));
         }
     }
 }

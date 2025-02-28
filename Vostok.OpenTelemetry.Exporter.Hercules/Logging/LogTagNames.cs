@@ -3,6 +3,8 @@
 internal static class LogEventTagNames
 {
     public const string OriginalFormat = "{OriginalFormat}";
+    public const string Category = "category";
+    public const string Scope = "scope";
 
     public const string Exception = "exception";
     public const string MessageTemplate = "messageTemplate";

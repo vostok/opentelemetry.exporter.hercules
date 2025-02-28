@@ -1,78 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
 using Vostok.Hercules.Client.Abstractions.Events;
-using Vostok.Logging.Abstractions;
-using Vostok.Logging.Abstractions.Values;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules.Logging;
 
 internal static class LogBuilderPropertiesExtensions
 {
-    private static readonly HashSet<string> FilteredProperties = new(StringComparer.OrdinalIgnoreCase)
-    {
-        // Constant scope has empty string name. Skip those values
-        string.Empty,
-
-        // Skip original format attribute as we write message template to vostok-specific tag
-        LogEventTagNames.OriginalFormat,
-
-        // Skip tracing tags as we already writing it from LogRecord value
-        LogEventTagNames.TraceId,
-        LogEventTagNames.SpanId,
-
-        // Some vostok properties
-        WellKnownProperties.TraceContext
-    };
-
     public static void AddProperties(
         this IHerculesTagsBuilder builder,
         LogRecord logRecord,
         Resource resource,
+        IFormatProvider? formatProvider,
         out string? messageTemplate)
     {
-        messageTemplate = null;
-
         if (!string.IsNullOrEmpty(logRecord.CategoryName))
-            builder.AddValue(WellKnownProperties.SourceContext, logRecord.CategoryName);
+            builder.AddValue(LogEventTagNames.Category, logRecord.CategoryName);
         if (logRecord.TraceId != default)
             builder.AddValue(LogEventTagNames.TraceId, logRecord.TraceId.ToHexString());
         if (logRecord.SpanId != default)
             builder.AddValue(LogEventTagNames.SpanId, logRecord.SpanId.ToHexString());
 
-        if (logRecord.Attributes is not null)
+        ProcessAttributes(builder, logRecord, formatProvider, out messageTemplate);
+        ProcessScopes(builder, logRecord, formatProvider);
+        ProcessResource(builder, resource, formatProvider);
+    }
+
+    private static void ProcessAttributes(
+        IHerculesTagsBuilder builder,
+        LogRecord logRecord,
+        IFormatProvider? formatProvider,
+        out string? messageTemplate)
+    {
+        messageTemplate = null;
+
+        if (logRecord.Attributes is null)
+            return;
+
+        foreach (var (key, value) in logRecord.Attributes)
         {
-            foreach (var (key, value) in logRecord.Attributes)
+            if (messageTemplate is null && key is LogEventTagNames.OriginalFormat && value is string format)
             {
-                if (messageTemplate is null && key is LogEventTagNames.OriginalFormat && value is string format)
+                messageTemplate = format;
+                continue;
+            }
+
+            AddProperty(builder, key, value, formatProvider);
+        }
+    }
+
+    private static void ProcessScopes(IHerculesTagsBuilder builder, LogRecord logRecord, IFormatProvider? formatProvider)
+    {
+        var scopeProcessingState = new ScopeProcessingState {Builder = builder, FormatProvider = formatProvider};
+        logRecord.ForEachScope(Process, scopeProcessingState);
+
+        if (scopeProcessingState.FormattedScopes is not null)
+            builder.AddVector(LogEventTagNames.Scope, scopeProcessingState.FormattedScopes);
+
+        return;
+
+        static void Process(LogRecordScope scope, ScopeProcessingState state)
+        {
+            foreach (var (key, value) in scope)
+            {
+                // note (ponomaryovigor, 28.02.2025): OTel LogRecordScope can be formatted if has empty key or contains {OriginalFormat}
+                if (key == string.Empty || key == LogEventTagNames.OriginalFormat)
                 {
-                    messageTemplate = format;
+                    if (Convert.ToString(scope.Scope) is {} formattedScopes)
+                    {
+                        state.FormattedScopes ??= [];
+                        state.FormattedScopes.Add(formattedScopes);
+                    }
+
                     continue;
                 }
 
-                // if (value is OperationContextValue operationContext)
-                    // value = operationContext.Select(context => context).ToString();
-
-                AddProperty(builder, key, value);
+                AddProperty(state.Builder, key, value, state.FormatProvider);
             }
         }
-
-        logRecord.ForEachScope((scope, providedBuilder) =>
-            {
-                foreach (var (key, value) in scope)
-                    AddProperty(providedBuilder, key, value);
-            },
-            builder);
-
-        foreach (var (key, value) in resource.Attributes)
-            AddProperty(builder, key, value);
     }
 
-    private static void AddProperty(IHerculesTagsBuilder builder, string key, object? value)
+    private static void ProcessResource(IHerculesTagsBuilder builder, Resource resource, IFormatProvider? formatProvider)
+    {
+        foreach (var (key, value) in resource.Attributes)
+            AddProperty(builder, key, value, formatProvider);
+    }
+
+    private static void AddProperty(IHerculesTagsBuilder builder, string key, object? value, IFormatProvider? formatProvider)
     {
         if (value is null || IsPositionalName(key) || FilteredProperties.Contains(key))
             return;
@@ -81,7 +98,8 @@ internal static class LogBuilderPropertiesExtensions
             return;
 
         var format = value is DateTime or DateTimeOffset ? "O" : null;
-        builder.AddValue(key, ObjectValueFormatter.Format(value, format!));
+
+        builder.AddValue(key, ObjectValueFormatter.Format(value, format, formatProvider));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -94,5 +112,12 @@ internal static class LogBuilderPropertiesExtensions
         }
 
         return true;
+    }
+
+    private sealed class ScopeProcessingState
+    {
+        public IHerculesTagsBuilder Builder = null!;
+        public IFormatProvider? FormatProvider;
+        public List<string>? FormattedScopes;
     }
 }
