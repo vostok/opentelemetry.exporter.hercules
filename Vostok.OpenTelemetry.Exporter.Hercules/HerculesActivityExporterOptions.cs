@@ -1,11 +1,9 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
-[SuppressMessage("ApiDesign", "RS0016:Добавьте открытые типы и элементы в объявленный API")]
 public class HerculesActivityExporterOptions
 {
     /// <summary>
