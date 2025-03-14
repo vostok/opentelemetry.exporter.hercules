@@ -18,5 +18,9 @@ public class HerculesActivityExporterOptions
     /// </summary>
     public IFormatProvider? FormatProvider { get; set; }
 
+    /// <summary>
+    /// Enable or disable activity exporting.
+    /// </summary>
+    /// <remarks>Default value is true.</remarks>
     public bool Enabled { get; set; } = true;
 }
