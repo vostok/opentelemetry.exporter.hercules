@@ -74,15 +74,16 @@ public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExpor
 
     private void ExportHistogram(Metric metric, MetricPoint metricPoint, HerculesMetricExporterOptions options)
     {
-        var aggregationParameters = new Dictionary<string, string>(2);
-
         var lowerBound = double.NegativeInfinity;
         foreach (var bucket in metricPoint.GetHistogramBuckets())
         {
             if (bucket.BucketCount != 0)
             {
-                aggregationParameters[AggregationHelper.LowerBoundKey] = AggregationHelper.SerializeDouble(lowerBound);
-                aggregationParameters[AggregationHelper.UpperBoundKey] = AggregationHelper.SerializeDouble(bucket.ExplicitBound);
+                var aggregationParameters = new Dictionary<string, string>
+                {
+                    [AggregationHelper.LowerBoundKey] = AggregationHelper.SerializeDouble(lowerBound),
+                    [AggregationHelper.UpperBoundKey] = AggregationHelper.SerializeDouble(bucket.ExplicitBound)
+                };
 
                 sink.Put(options.HistogramsStream,
                     builder => builder.BuildMetric(
