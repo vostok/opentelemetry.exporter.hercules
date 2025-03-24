@@ -1,3 +1,7 @@
+## 1.0.4 (13-12-2024):
+
+Add logs exporting; Add Meter tags exporting; Add ability to disable exporters.
+
 ## 1.0.3 (13-12-2024): 
 
 Bump NuGet deps versions
