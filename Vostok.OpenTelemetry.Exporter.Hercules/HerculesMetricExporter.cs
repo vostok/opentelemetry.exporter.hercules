@@ -1,93 +1,101 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
-using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
-using Vostok.OpenTelemetry.Exporter.Hercules.Helpers;
+using Vostok.OpenTelemetry.Exporter.Hercules.Metrics;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
-public class HerculesMetricExporter : BaseExporter<Metric>
+[PublicAPI]
+public class HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
+    : BaseExporter<Metric>
 {
-    private const string CounterAggregationType = "counter";
-    private const string HistogramAggregationType = "histogram";
-
-    private readonly IHerculesSink sink;
-    private readonly Func<HerculesMetricExporterOptions> optionsProvider;
-
-    public HerculesMetricExporter(IHerculesSink sink, Func<HerculesMetricExporterOptions> optionsProvider)
-    {
-        this.sink = sink;
-        this.optionsProvider = optionsProvider;
-    }
+    private Resource _resource = null!;
 
     public override ExportResult Export(in Batch<Metric> batch)
     {
-        foreach (var metric in batch)
+        // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
+        _resource ??= ParentProvider.GetResource();
+
+        var options = optionsProvider();
+        if (options.Enabled)
         {
-            switch (metric.MetricType)
-            {
-                case MetricType.LongSum:
-                case MetricType.LongSumNonMonotonic:
-                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                        ExportCounter(metric, metricPoint, metricPoint.GetSumLong());
-                    break;
-                case MetricType.DoubleSum:
-                case MetricType.DoubleSumNonMonotonic:
-                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                        ExportCounter(metric, metricPoint, metricPoint.GetSumDouble());
-                    break;
-                case MetricType.LongGauge:
-                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                        ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueLong());
-                    break;
-                case MetricType.DoubleGauge:
-                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                        ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueDouble());
-                    break;
-                case MetricType.Histogram:
-                    foreach (ref readonly var metricPoint in metric.GetMetricPoints())
-                        ExportHistogram(metric, metricPoint);
-                    break;
-            }
+            foreach (var metric in batch)
+                ExportMetric(metric, options);
         }
 
         return ExportResult.Success;
     }
 
-    private void ExportCounter(Metric metric, MetricPoint metricPoint, double value)
+    private void ExportMetric(Metric metric, HerculesMetricExporterOptions options)
     {
-        sink.Put(optionsProvider().CountersStream,
-            builder =>
-                HerculesMetricBuilder.Build(metric, metricPoint, value, CounterAggregationType, null, ParentProvider!.GetResource(), builder));
+        // note (ponomaryovigor, 02.11.2024): ExponentialHistogram not supported
+        switch (metric.MetricType)
+        {
+            case MetricType.LongSum:
+            case MetricType.LongSumNonMonotonic:
+                foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                    ExportCounter(metric, metricPoint, metricPoint.GetSumLong(), options);
+                break;
+            case MetricType.DoubleSum:
+            case MetricType.DoubleSumNonMonotonic:
+                foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                    ExportCounter(metric, metricPoint, metricPoint.GetSumDouble(), options);
+                break;
+            case MetricType.LongGauge:
+                foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueLong(), options);
+                break;
+            case MetricType.DoubleGauge:
+                foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                    ExportGauge(metric, metricPoint, metricPoint.GetGaugeLastValueDouble(), options);
+                break;
+            case MetricType.Histogram:
+                foreach (ref readonly var metricPoint in metric.GetMetricPoints())
+                    ExportHistogram(metric, metricPoint, options);
+                break;
+        }
     }
 
-    private void ExportGauge(Metric metric, MetricPoint metricPoint, double value)
+    private void ExportCounter(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
-        sink.Put(optionsProvider().FinalStream,
-            builder =>
-                HerculesMetricBuilder.Build(metric, metricPoint, value, null, null, ParentProvider!.GetResource(), builder));
+        sink.Put(options.CountersStream,
+            builder => builder.BuildMetric(_resource, metric, metricPoint, value, AggregationTypes.Counter, null));
     }
 
-    private void ExportHistogram(Metric metric, MetricPoint metricPoint)
+    private void ExportGauge(Metric metric, MetricPoint metricPoint, double value, HerculesMetricExporterOptions options)
     {
-        var bound = double.NegativeInfinity;
+        sink.Put(options.FinalStream,
+            builder => builder.BuildMetric(_resource, metric, metricPoint, value, null, null));
+    }
+
+    private void ExportHistogram(Metric metric, MetricPoint metricPoint, HerculesMetricExporterOptions options)
+    {
+        var lowerBound = double.NegativeInfinity;
         foreach (var bucket in metricPoint.GetHistogramBuckets())
         {
             if (bucket.BucketCount != 0)
             {
                 var aggregationParameters = new Dictionary<string, string>
                 {
-                    [AggregationParametersNames.LowerBound] = DoubleSerializer.Serialize(bound),
-                    [AggregationParametersNames.UpperBound] = DoubleSerializer.Serialize(bucket.ExplicitBound)
+                    [AggregationHelper.LowerBoundKey] = AggregationHelper.SerializeDouble(lowerBound),
+                    [AggregationHelper.UpperBoundKey] = AggregationHelper.SerializeDouble(bucket.ExplicitBound)
                 };
-                sink.Put(optionsProvider().HistogramsStream,
-                    builder =>
-                        HerculesMetricBuilder.Build(metric, metricPoint, bucket.BucketCount, HistogramAggregationType, aggregationParameters, ParentProvider!.GetResource(), builder));
+
+                sink.Put(options.HistogramsStream,
+                    builder => builder.BuildMetric(
+                        _resource,
+                        metric,
+                        metricPoint,
+                        bucket.BucketCount,
+                        AggregationTypes.Histogram,
+                        aggregationParameters));
             }
 
-            bound = bucket.ExplicitBound;
+            lowerBound = bucket.ExplicitBound;
         }
     }
 }

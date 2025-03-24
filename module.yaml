@@ -11,7 +11,11 @@ notests *default:
         - target-framework: "net6.0"
           libraries:
             - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net6.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
+        - target-framework: "net8.0"
+          libraries:
+            - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net8.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
   deps:
+    - vostok.logging.abstractions
     - vostok.commons.time/src
     - vostok.commons.formatting/src
     - vostok.devtools
@@ -27,6 +31,9 @@ full-build > notests:
         - target-framework: "net6.0"
           libraries:
             - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net6.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
+        - target-framework: "net8.0"
+          libraries:
+            - Vostok.OpenTelemetry.Exporter.Hercules/bin/Release/net8.0/Vostok.OpenTelemetry.Exporter.Hercules.dll
 
   build:
     target: Vostok.OpenTelemetry.Exporter.Hercules.sln

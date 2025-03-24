@@ -2,28 +2,28 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using OpenTelemetry;
+using OpenTelemetry.Resources;
 using Vostok.Hercules.Client.Abstractions;
-using Vostok.OpenTelemetry.Exporter.Hercules.Builders;
+using Vostok.OpenTelemetry.Exporter.Hercules.Tracing;
 
 namespace Vostok.OpenTelemetry.Exporter.Hercules;
 
 [PublicAPI]
-public class HerculesActivityExporter : BaseExporter<Activity>
+public class HerculesActivityExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
+    : BaseExporter<Activity>
 {
-    private readonly IHerculesSink sink;
-    private readonly Func<HerculesActivityExporterOptions> optionsProvider;
-
-    public HerculesActivityExporter(IHerculesSink sink, Func<HerculesActivityExporterOptions> optionsProvider)
-    {
-        this.sink = sink;
-        this.optionsProvider = optionsProvider;
-    }
+    private Resource? _resource;
 
     public override ExportResult Export(in Batch<Activity> batch)
     {
-        foreach (var @event in batch)
-            sink.Put(optionsProvider().Stream, builder =>
-                HerculesActivityBuilder.Build(@event, ParentProvider!.GetResource(), builder, optionsProvider().FormatProvider));
+        _resource ??= ParentProvider.GetResource();
+
+        var options = optionsProvider();
+        if (options.Enabled)
+        {
+            foreach (var activity in batch)
+                sink.Put(options.Stream, builder => builder.BuildActivity(activity, _resource, options.FormatProvider));
+        }
 
         return ExportResult.Success;
     }
