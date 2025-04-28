@@ -1,4 +1,8 @@
-## 1.0.4 (13-12-2024):
+## 1.0.5 (28-04-2025):
+
+Fix "use after dispose" issue for logs exporting.
+
+## 1.0.4 (24-03-2024):
 
 Add logs exporting; Add Meter tags exporting; Add ability to disable exporters.
 
