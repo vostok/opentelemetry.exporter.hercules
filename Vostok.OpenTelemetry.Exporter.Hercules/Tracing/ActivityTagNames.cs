@@ -15,4 +15,10 @@ internal static class ActivityTagNames
     public const string EndTimestampUtcOffset = "endTimestampUtcOffset";
 
     public const string Annotations = "annotations";
+
+    public const string Events = "events";
+    public const string Links = "links";
+
+    public const string Name = "name";
+    public const string TimestampUtc = "timestampUtc";
 }

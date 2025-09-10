@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using OpenTelemetry.Resources;
 using Vostok.Commons.Formatting;
@@ -34,9 +35,6 @@ internal static class HerculesActivityBuilder
 
         builder.AddContainer(ActivityTagNames.Annotations,
             tagBuilder => BuildAnnotationsContainer(tagBuilder, activity, resource, formatProvider));
-
-        // todo (kungurtsev, 27.02.2023): send Activity.Events
-        // todo (kungurtsev, 27.02.2023): send Activity.Links
     }
 
     private static void BuildAnnotationsContainer(
@@ -45,28 +43,83 @@ internal static class HerculesActivityBuilder
         Resource resource,
         IFormatProvider? formatProvider)
     {
-        AddAnnotation(WellKnownAnnotations.Common.Component, activity.Source.Name);
-        AddAnnotation(WellKnownAnnotations.Common.Operation, activity.DisplayName);
-        AddAnnotation(WellKnownAnnotations.Common.Kind, activity.Kind);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Component, activity.Source.Name, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Operation, activity.DisplayName, formatProvider);
+        AddAnnotation(builder, WellKnownAnnotations.Common.Kind, activity.Kind, formatProvider);
 
         if (activity.Status != ActivityStatusCode.Unset)
-            AddAnnotation(WellKnownAnnotations.Common.Status, activity.Status.ToString());
+            AddAnnotation(builder, WellKnownAnnotations.Common.Status, activity.Status.ToString(), formatProvider);
         if (!string.IsNullOrEmpty(activity.StatusDescription))
-            AddAnnotation(ActivityTagNames.Error, activity.StatusDescription);
+            AddAnnotation(builder, ActivityTagNames.Error, activity.StatusDescription, formatProvider);
 
         foreach (ref readonly var pair in activity.EnumerateTagObjects())
-            AddAnnotation(pair.Key, pair.Value);
+            AddAnnotation(builder, pair.Key, pair.Value, formatProvider);
 
         foreach (var resourceAttribute in resource.Attributes)
-            AddAnnotation(resourceAttribute.Key, resourceAttribute.Value);
+            AddAnnotation(builder, resourceAttribute.Key, resourceAttribute.Value, formatProvider);
 
-        return;
+        BuildEventsContainer(builder, activity, formatProvider);
+        BuildLinksContainer(builder, activity, formatProvider);
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void AddAnnotation(string key, object? value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AddAnnotation(IHerculesTagsBuilder builder, string key, object? value, IFormatProvider? formatProvider)
+    {
+        if (!builder.TryAddObject(key, value))
+            builder.AddValue(key, ObjectValueFormatter.Format(value!, formatProvider: formatProvider!));
+    }
+
+    private static void BuildEventsContainer(
+        IHerculesTagsBuilder builder,
+        Activity activity,
+        IFormatProvider? formatProvider)
+    {
+        if (!activity.Events.Any())
         {
-            if (!builder.TryAddObject(key, value))
-                builder.AddValue(key, ObjectValueFormatter.Format(value, formatProvider: formatProvider));
+            return;
         }
+
+        builder.AddVectorOfContainers(ActivityTagNames.Events,
+            activity.Events.ToList(),
+            (eventsBuilder, activityEvent) =>
+            {
+                eventsBuilder.AddValue(ActivityTagNames.Name, activityEvent.Name);
+                eventsBuilder.AddValue(ActivityTagNames.TimestampUtc, activityEvent.Timestamp.ToString("O"));
+                eventsBuilder.AddContainer(ActivityTagNames.Annotations,
+                    eventAnnotationsBuilder =>
+                    {
+                        foreach (ref readonly var pair in activityEvent.EnumerateTagObjects())
+                        {
+                            AddAnnotation(eventAnnotationsBuilder, pair.Key, pair.Value, formatProvider);
+                        }
+                    });
+            });
+    }
+
+    private static void BuildLinksContainer(
+        IHerculesTagsBuilder builder,
+        Activity activity,
+        IFormatProvider? formatProvider)
+    {
+        if (!activity.Links.Any())
+        {
+            return;
+        }
+
+        builder.AddVectorOfContainers(ActivityTagNames.Links,
+            activity.Links.ToList(),
+            (linksBuilder, activityLink) =>
+            {
+                linksBuilder.AddValue(ActivityTagNames.TraceId, activityLink.Context.TraceId.ToGuid());
+                linksBuilder.AddValue(ActivityTagNames.SpanId, activityLink.Context.SpanId.ToGuid());
+                linksBuilder.AddContainer(ActivityTagNames.Annotations,
+                    linkAnnotationsBuilder =>
+                    {
+                        foreach (ref readonly var pair in activityLink.EnumerateTagObjects())
+                        {
+                            AddAnnotation(linkAnnotationsBuilder, pair.Key, pair.Value, formatProvider);
+                        }
+                    });
+            });
     }
 }
