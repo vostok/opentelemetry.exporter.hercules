@@ -1,3 +1,7 @@
+## 1.0.6 (08-09-2025):
+
+Export Activity Events and Activity Links
+
 ## 1.0.5 (28-04-2025):
 
 Fix "use after dispose" issue for logs exporting.
